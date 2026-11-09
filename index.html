@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a1c11">
+<title>নকশা CNC</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4eee5;--card:#fffaf3;--ink:#2a1c11;--mut:#7b6655;--acc:#9a4c18;--acc2:#d08a3c;--line:#e6d7c2;--soft:#f7e9d6;--warn:#a8471a;--ok:#2d7a4c;--bar:#2a1c11;--top:calc(56px + env(safe-area-inset-top))}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Hind Siliguri',system-ui,sans-serif;font-size:16px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+header.bar{position:fixed;top:0;left:0;right:0;z-index:30;height:var(--top);padding:env(safe-area-inset-top) 8px 0;display:flex;align-items:center;gap:6px;background:var(--bar);color:#fbead2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.ib{border:0;background:transparent;color:inherit;font-size:22px;width:42px;height:42px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ib:active{background:rgba(255,255,255,.12)}
+.ttl{flex:1;min-width:0;line-height:1.2}.ttl b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ttl small{font-size:12.5px;opacity:.75}
+.unitb{border:1px solid #6b4e36;background:#3d2a1b;color:#fbead2;border-radius:20px;padding:5px 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.prog{position:fixed;top:var(--top);left:0;right:0;height:4px;background:#e2d2bb;z-index:29}.prog i{display:block;height:100%;background:var(--acc2);transition:width .3s}
+.wrap{max-width:760px;margin:0 auto;padding:calc(var(--top) + 10px) 12px calc(96px + env(safe-area-inset-bottom))}
+.pvpane{position:sticky;top:calc(var(--top) + 6px);z-index:20;margin-bottom:10px}
+.pvbox{position:relative;background:linear-gradient(#efe6da,#ddd2c3);border-radius:16px;overflow:hidden;display:flex;justify-content:center;align-items:center;height:34vh;min-height:190px;box-shadow:0 6px 18px rgba(60,35,10,.15);border:1px solid var(--line);perspective:900px}
+.pvbox.paper{background:#fff}
+.pvbox canvas{max-width:100%;max-height:100%;display:block;transition:transform .35s}
+.pvbox canvas.tilt{transform:rotateX(36deg) rotateZ(-6deg) scale(.82);filter:drop-shadow(0 22px 18px rgba(0,0,0,.35))}
+.pvtools{position:absolute;left:6px;right:6px;bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.pvtools>*{pointer-events:auto}
+.seg{display:flex;background:rgba(255,250,243,.92);border-radius:12px;padding:2px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.seg button{border:0;background:transparent;padding:5px 9px;border-radius:10px;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff}
+.pvfull{border:0;background:rgba(255,250,243,.92);border-radius:12px;width:36px;height:34px;font-size:18px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.pvdim{position:absolute;top:6px;left:8px;font-size:12px;font-weight:600;background:rgba(255,250,243,.88);padding:1px 8px;border-radius:10px;color:var(--ink)}
+.pvbusy{position:absolute;top:6px;right:8px;font-size:12px;color:var(--mut)}
+.warnline{margin-top:6px;background:#fbe6d6;color:#7d3410;border-radius:10px;padding:6px 10px;font-size:13px}
+h2{font-size:19px;margin:4px 0 4px;color:var(--acc)}
+h3{font-size:15.5px;margin:16px 0 8px}
+.lead{color:var(--mut);font-size:14px;margin:0 0 10px}
+.tip{background:var(--soft);border-left:4px solid var(--acc2);padding:8px 10px;border-radius:10px;font-size:13.5px;margin:8px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:600px){.grid3{grid-template-columns:repeat(4,1fr)}}
+.opt{border:2px solid var(--line);background:#fff;border-radius:14px;padding:6px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:4px;transition:transform .08s,border-color .15s}
+.opt:active{transform:scale(.97)}
+.opt.on{border-color:var(--acc);background:#fff3e3;box-shadow:0 0 0 3px rgba(154,76,24,.15)}
+.opt .th{height:120px;border-radius:10px;background:linear-gradient(#efe6da,#ddd2c3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.opt .th canvas{max-width:100%;max-height:100%;display:block}
+.opt .th .ld{font-size:12px;color:var(--mut)}
+.opt b{font-size:13.5px;line-height:1.25}.opt small{font-size:11.5px;color:var(--mut);line-height:1.25}
+.opt.big .th{height:210px}
+.opt .chk{position:absolute;top:6px;right:6px;background:var(--acc);color:#fff;border-radius:50%;width:24px;height:24px;font-size:14px;display:none;align-items:center;justify-content:center}
+.opt.on .chk{display:flex}
+.fur{border:2px solid var(--line);background:#fff;border-radius:16px;padding:10px 6px;cursor:pointer;text-align:center;font-weight:600;font-size:14px}
+.fur svg{width:64px;height:64px;display:block;margin:0 auto 4px}
+.fur.on{border-color:var(--acc);background:#fff3e3}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:20px;padding:6px 13px;cursor:pointer;font-weight:600;font-size:14px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.chip.sug{border-style:dashed;border-color:var(--acc2)}
+.fld{display:flex;flex-direction:column;gap:3px;font-size:13.5px;color:var(--mut)}
+.fld input,.fld select{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;color:var(--ink);font-size:17px;width:100%}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--acc2)}
+.fld.bigin input{font-size:22px;font-weight:600;text-align:center}
+.rng{display:flex;flex-direction:column;gap:2px;font-size:13.5px;color:var(--mut);margin:6px 0}
+.rng input{width:100%;accent-color:var(--acc)}
+.rng .v{color:var(--ink);font-weight:600}
+.tog{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;font-size:15px;margin:6px 0}
+.tog input{width:22px;height:22px;accent-color:var(--acc)}
+details.more{margin-top:10px;border:1px dashed var(--acc2);border-radius:12px;padding:0 10px;background:#fffaf3}
+details.more summary{padding:9px 0;font-weight:600;color:var(--acc);cursor:pointer}
+details.more .grid2{padding-bottom:10px}
+footer.act{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(244,238,229,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line)}
+footer.act .btn{flex:1}
+.btn{border:0;background:var(--acc);color:#fff;border-radius:14px;padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer}
+.btn.sec{background:#fff;color:var(--acc);border:1.5px solid var(--acc);flex:0 0 auto!important}
+.btn.full{width:100%}
+.btn:disabled{opacity:.5}
+.home-hero{border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#3a2616,#6b3f1d);color:#fbead2;padding:16px;display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.home-hero canvas{width:92px;height:auto;border-radius:10px;flex:0 0 auto}
+.home-hero h1{margin:0;font-size:22px}.home-hero p{margin:4px 0 0;font-size:13.5px;opacity:.85}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{border:0;border-radius:18px;padding:16px 12px;text-align:left;cursor:pointer;background:#fff;box-shadow:0 3px 12px rgba(60,35,10,.1);border:1px solid var(--line);display:flex;flex-direction:column;gap:4px;min-height:132px}
+.tile .em{font-size:32px}.tile b{font-size:17px}.tile small{color:var(--mut);font-size:12.5px;line-height:1.35}
+.tile.main{background:linear-gradient(160deg,#fff7ec,#f6e2c6)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.slim{border:1px solid var(--line);background:#fff;border-radius:14px;padding:12px;font-weight:600;cursor:pointer;text-align:left}
+.list{display:flex;flex-direction:column;gap:8px}
+.fileitem{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.fileitem .n{width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+.fileitem .i{flex:1;min-width:0}.fileitem .i b{display:block;font-size:14.5px}.fileitem .i small{color:var(--mut);font-size:12.5px}
+.mini{font-size:12.5px;color:var(--mut)}
+.warn{background:#fbe6d6;color:#7d3410;border-radius:10px;padding:7px 10px;font-size:13.5px;margin:5px 0}
+.okm{background:#e3f1e6;color:#1f5a36;border-radius:10px;padding:7px 10px;font-size:13.5px;margin:5px 0}
+.tipm{background:#f6efe4;border-radius:10px;padding:7px 10px;font-size:13.5px;margin:5px 0}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:7px 5px;text-align:left;vertical-align:top}
+table.t th{background:#f3e7d6}
+.scroll{overflow-x:auto}
+pre.code{background:#1f1813;color:#f3dfc2;padding:10px;border-radius:12px;max-height:260px;overflow:auto;font-size:11.5px}
+.drop{border:2px dashed var(--acc2);border-radius:16px;padding:22px 12px;text-align:center;background:#fffaf3;cursor:pointer;font-weight:600}
+.drop img{max-width:100%;max-height:180px;border-radius:10px;margin-top:8px;display:block;margin-left:auto;margin-right:auto}
+.help details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
+.help summary{padding:12px;font-weight:700;cursor:pointer;color:var(--acc)}
+.help .in{padding:0 14px 12px;font-size:14.5px}
+.help li{margin-bottom:5px}
+.guide{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.guide button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;text-align:left;cursor:pointer;font-weight:600;font-size:14px}
+.guide button.on{border-color:var(--acc);background:#fff3e3}
+.viewer{position:fixed;inset:0;z-index:60;background:#1c1510;display:flex;flex-direction:column}
+.viewer .vt{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;color:#fbead2}
+.viewer .vc{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;perspective:1200px}
+.viewer .vc.paper{background:#fff}
+.viewer canvas{max-width:100%;max-height:100%;transition:transform .35s}
+.viewer canvas.zoom{max-width:none;max-height:none;width:200%}
+.viewer canvas.tilt{transform:rotateX(36deg) rotateZ(-6deg) scale(.85)}
+.legend{font-size:11.5px;color:var(--mut);margin-top:5px;line-height:1.9}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 3px 0 8px;vertical-align:middle}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2a1c11;color:#fbead2;padding:10px 16px;border-radius:14px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;pointer-events:none;max-width:92vw;text-align:center}
+.toast.on{opacity:1}
+.stepname{display:flex;align-items:baseline;gap:8px}.stepname .no{font-size:13px;color:var(--mut)}
+</style>
+</head>
+<body>
+<header class="bar">
+  <button class="ib" id="backB" aria-label="পিছনে">←</button>
+  <div class="ttl"><b id="ttl">নকশা CNC</b><small id="sub">ফার্নিচারের নকশা থেকে CNC ফাইল</small></div>
+  <button class="unitb" id="unitB">ইঞ্চি</button>
+</header>
+<div class="prog hidden" id="prog"><i id="progI"></i></div>
+<div class="wrap">
+  <div class="pvpane hidden" id="pvPane">
+    <div class="pvbox" id="pvBox">
+      <canvas id="pv" width="10" height="10"></canvas>
+      <div class="pvdim" id="pvDim"></div><div class="pvbusy" id="pvBusy"></div>
+      <div class="pvtools">
+        <div class="seg" id="pvSeg"><button data-v="shade" class="on">3D</button><button data-v="draw">2D মাপ</button><button data-v="tilt">হেলানো</button><button data-v="path">টুলপাথ</button></div>
+        <button class="pvfull" id="pvFull" title="বড় করে দেখো">⤢</button>
+      </div>
+    </div>
+    <div class="legend hidden" id="pvLegend"><i style="background:#1d4fa3"></i>লাইন (V-বিট)<i style="background:#e08a1c"></i>রিলিফ<i style="background:#1f8a4c"></i>জালি<i style="background:#d0281c"></i>কাটিং<i style="background:#f0a020"></i>ট্যাব<i style="background:#7a2ea0"></i>ছিদ্র</div>
+    <div class="warnline hidden" id="warnLine"></div>
+  </div>
+  <main id="main"></main>
+</div>
+<footer class="act hidden" id="act"><button class="btn sec" id="prevB">← আগের</button><button class="btn" id="nextB">পরের ধাপ →</button></footer>
+<div class="viewer hidden" id="viewer">
+  <div class="vt"><button class="ib" id="vClose">✕</button><div class="seg" id="vSeg"><button data-v="shade" class="on">3D</button><button data-v="draw">2D মাপ</button><button data-v="tilt">হেলানো</button><button data-v="path">টুলপাথ</button></div><button class="ib" id="vZoom" title="জুম">🔍</button></div>
+  <div class="vc" id="vc"><canvas id="vcv"></canvas></div>
+</div>
+<input type="file" accept="image/*" id="fileIn" class="hidden">
+<div class="toast" id="toast"></div>
+<script>
+'use strict';
+/* ===================== GEOMETRY / ENGINE ===================== */
+function topY(p,x){const W=p.W,H=p.H,a=Math.min(Math.max(0,p.archH),H*0.9),xc=Math.min(1,Math.abs(x-W/2)/(W/2));
+ switch(p.top){
+  case 'arch':return H-a+a*Math.sqrt(Math.max(0,1-xc*xc));
+  case 'carch':{const hw=0.34;return xc<hw?H-a+a*Math.sqrt(Math.max(0,1-(xc/hw)**2)):H-a;}
+  case 'wave':{const k=Math.max(1,Math.round(p.waves||5));return H-a+a*Math.pow(Math.abs(Math.sin(Math.PI*k*x/W)),0.6);}
+  case 'crown':{let g;if(xc<0.18)g=0.35*(1-Math.cos(Math.PI*xc/0.18))/2;else if(xc<0.3)g=0.35;else if(xc<0.42)g=0.35+0.3*(1-Math.cos(Math.PI*(xc-0.3)/0.12))/2;else if(xc<0.82)g=0.65;else g=0.65+0.35*(1-Math.cos(Math.PI*(xc-0.82)/0.18))/2;return H-a*g;}
+  case 'gable':return H-a*xc;
+  case 'step':return H-a*(xc<0.34?0:xc<0.67?0.5:1);
+  default:return H;}}
+function botY(p,x){const W=p.W,b=Math.min(Math.max(0,p.bArchH),p.H*0.5);
+ switch(p.bottom){
+  case 'arch':{const hw=0.4*W,d=(x-W/2)/hw;return Math.abs(d)<1?b*Math.sqrt(1-d*d):0;}
+  case 'scallop':return b*Math.pow(Math.abs(Math.sin(Math.PI*3*x/W)),0.7);
+  default:return 0;}}
+function cornerOK(p,x,y){const r=p.radius;if(r<=0)return true;const W=p.W,H=p.H;
+ if(p.bottom==='flat'){if(x<r&&y<r&&Math.hypot(x-r,y-r)>r)return false;if(x>W-r&&y<r&&Math.hypot(x-W+r,y-r)>r)return false;}
+ if(p.top==='flat'){if(x<r&&y>H-r&&Math.hypot(x-r,y-H+r)>r)return false;if(x>W-r&&y>H-r&&Math.hypot(x-W+r,y-H+r)>r)return false;}
+ return true;}
+function makeGrid(W,H,res,M){const gw=Math.ceil((W+2*M)/res),gh=Math.ceil((H+2*M)/res);
+ return {gw,gh,res,M,W,H,X:i=>(i+0.5)*res-M,Y:j=>H+M-(j+0.5)*res,I:x=>(x+M)/res-0.5,J:y=>(H+M-y)/res-0.5};}
+
+const BIG=1e20;
+function dt1d(f,n,d,v,z){let k=0;v[0]=0;z[0]=-Infinity;z[1]=Infinity;
+ for(let q=1;q<n;q++){let s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);
+  while(s<=z[k]){k--;s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);}
+  k++;v[k]=q;z[k]=s;z[k+1]=Infinity;}
+ k=0;for(let q=0;q<n;q++){while(z[k+1]<q)k++;const t=q-v[k];d[q]=t*t+f[v[k]];}}
+function sqdt(mask,w,h,target){const g=new Float64Array(w*h);for(let i=0;i<w*h;i++)g[i]=mask[i]===target?0:BIG;
+ const n=Math.max(w,h),f=new Float64Array(n),d=new Float64Array(n),v=new Int32Array(n),z=new Float64Array(n+1);
+ for(let x=0;x<w;x++){for(let y=0;y<h;y++)f[y]=g[y*w+x];dt1d(f,h,d,v,z);for(let y=0;y<h;y++)g[y*w+x]=d[y];}
+ for(let y=0;y<h;y++){const o=y*w;for(let x=0;x<w;x++)f[x]=g[o+x];dt1d(f,w,d,v,z);for(let x=0;x<w;x++)g[o+x]=d[x];}
+ return g;}
+function signedDist(mask,w,h){const a=sqdt(mask,w,h,0),b=sqdt(mask,w,h,1),S=new Float32Array(w*h);
+ for(let i=0;i<w*h;i++)S[i]=mask[i]?Math.sqrt(a[i])-0.5:-(Math.sqrt(b[i])-0.5);return S;}
+
+// marching squares with interpolation; returns loops of [i,j] (pixel-centre grid coords)
+function contours(F,w,h,lev){
+ const sa=[];const pts=new Map();
+ const ep=k=>{if(pts.has(k))return;const idx=k>>1,x=idx%w,y=(idx-x)/w;
+  if(k&1){const a=F[y*w+x],b=F[(y+1)*w+x];pts.set(k,[x,y+(lev-a)/(b-a)]);}
+  else{const a=F[y*w+x],b=F[y*w+x+1];pts.set(k,[x+(lev-a)/(b-a),y]);}};
+ const seg=(a,b)=>{ep(a);ep(b);sa.push(a,b);};
+ for(let y=0;y<h-1;y++){const o=y*w,o2=o+w;for(let x=0;x<w-1;x++){
+  const tl=F[o+x]>lev,tr=F[o+x+1]>lev,br=F[o2+x+1]>lev,bl=F[o2+x]>lev;
+  const c=(tl?8:0)|(tr?4:0)|(br?2:0)|(bl?1:0);if(c===0||c===15)continue;
+  const T=(o+x)*2,B=(o2+x)*2,L=(o+x)*2+1,R=(o+x+1)*2+1;
+  switch(c){case 1:seg(L,B);break;case 2:seg(B,R);break;case 3:seg(L,R);break;case 4:seg(T,R);break;
+   case 5:{const m=(F[o+x]+F[o+x+1]+F[o2+x]+F[o2+x+1])/4>lev;if(m){seg(L,T);seg(B,R);}else{seg(T,R);seg(L,B);}break;}
+   case 6:seg(T,B);break;case 7:seg(L,T);break;case 8:seg(L,T);break;case 9:seg(T,B);break;
+   case 10:{const m=(F[o+x]+F[o+x+1]+F[o2+x]+F[o2+x+1])/4>lev;if(m){seg(T,R);seg(L,B);}else{seg(L,T);seg(B,R);}break;}
+   case 11:seg(T,R);break;case 12:seg(L,R);break;case 13:seg(B,R);break;case 14:seg(L,B);break;}}}
+ const ns=sa.length/2,adj=new Map();
+ for(let n=0;n<ns;n++)for(const k of [sa[2*n],sa[2*n+1]]){const l=adj.get(k);if(l)l.push(n);else adj.set(k,[n]);}
+ const used=new Uint8Array(ns),loops=[];
+ for(let n=0;n<ns;n++){if(used[n])continue;used[n]=1;const loop=[sa[2*n],sa[2*n+1]];let cur=sa[2*n+1];
+  for(;;){const l=adj.get(cur);let nx=-1;for(const m of l)if(!used[m]){nx=m;break;}if(nx<0)break;used[nx]=1;
+   const o=sa[2*nx]===cur?sa[2*nx+1]:sa[2*nx];loop.push(o);cur=o;}
+  if(loop[loop.length-1]===loop[0])loop.pop();loops.push(loop.map(k=>pts.get(k)));}
+ return loops;}
+function rdp(pts,eps){if(pts.length<3)return pts;const keep=new Uint8Array(pts.length);keep[0]=keep[pts.length-1]=1;const st=[[0,pts.length-1]];
+ while(st.length){const [a,b]=st.pop();const ax=pts[a][0],ay=pts[a][1],dx=pts[b][0]-ax,dy=pts[b][1]-ay,L=Math.hypot(dx,dy);let md=0,mi=-1;
+  for(let i=a+1;i<b;i++){const d=L<1e-9?Math.hypot(pts[i][0]-ax,pts[i][1]-ay):Math.abs((pts[i][0]-ax)*dy-(pts[i][1]-ay)*dx)/L;if(d>md){md=d;mi=i;}}
+  if(md>eps&&mi>0){keep[mi]=1;st.push([a,mi],[mi,b]);}}
+ return pts.filter((p,i)=>keep[i]);}
+function toMM(G,loop,eps){const p=loop.map(([i,j])=>[G.X(i),G.Y(j)]);if(p.length<3)return p;p.push(p[0].slice());const r=rdp(p,eps);r.pop();return r;}
+function area(p){let a=0;for(let i=0,n=p.length;i<n;i++){const q=p[(i+1)%n];a+=p[i][0]*q[1]-q[0]*p[i][1];}return a/2;}
+function perim(p,closed=true){let s=0;for(let i=1;i<p.length;i++)s+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);if(closed&&p.length>1)s+=Math.hypot(p[0][0]-p[p.length-1][0],p[0][1]-p[p.length-1][1]);return s;}
+function loopsAt(G,F,lev,eps,minArea){return contours(F,G.gw,G.gh,lev).map(L=>toMM(G,L,eps)).filter(p=>p.length>2&&Math.abs(area(p))>=(minArea||0));}
+
+/* ---------- motif functions: return raised height 0..1, or -1 outside region ---------- */
+function leafF(x,y,ox,oy,ang,len,wid){const c=Math.cos(ang),s=Math.sin(ang),dx=x-ox,dy=y-oy,a=dx*c+dy*s,b=-dx*s+dy*c;
+ if(a<=0||a>=len)return 0;const sa=Math.sin(Math.PI*a/len),w=wid*Math.pow(sa,0.8);if(Math.abs(b)>=w)return 0;
+ const t=b/w;let h=Math.sqrt(1-t*t)*(0.55+0.45*sa);h-=0.3*Math.exp(-((t*7)**2))*sa;return Math.max(0.1,h);}
+const dome=(r,R)=>r<R?Math.sqrt(1-(r/R)**2):0;
+const tri=x=>{x-=Math.floor(x);return 1-Math.abs(2*x-1);};
+const MOT={
+ rosette(u,v){const r=Math.hypot(u,v);if(r>1)return -1;if(r>0.87&&r<0.96)return 0.75;
+  if(r<0.19)return 0.4+0.6*dome(r,0.19);if(r<0.24)return 0;const th=Math.atan2(v,u),c=Math.abs(Math.cos(4*th));
+  const R=0.24+0.58*(0.3+0.7*c);if(r<R){const k=(r-0.24)/(R-0.24);return 0.2+0.75*Math.sin(Math.PI*(0.12+0.88*k))*(0.55+0.45*c);}return 0;},
+ lotus(u,v){if(u*u+v*v>1)return -1;let h=0;const P=[[90,1.42,0.3],[62,1.22,0.27],[118,1.22,0.27],[36,0.95,0.22],[144,0.95,0.22],[12,0.62,0.16],[168,0.62,0.16]];
+  for(const [a,l,w] of P)h=Math.max(h,leafF(u,v,0,-0.7,a*Math.PI/180,l,w));
+  const bb=Math.hypot(u/0.45,(v+0.78)/0.14);if(bb<1)h=Math.max(h,0.2+0.6*Math.sqrt(1-bb*bb));return h;},
+ star(u,v){const r=Math.hypot(u,v);if(r>1)return -1;if(r>0.87&&r<0.95)return 0.75;const th=Math.atan2(v,u),t=tri(th*8/(2*Math.PI)),Rs=0.32+0.5*t;
+  if(r<Rs){const k=r/Rs;const ridge=tri(th*16/(2*Math.PI)+0.5);return 0.1+0.9*(1-k)*(0.6+0.4*ridge);}return 0;},
+ diamond(u,v){const m=Math.abs(u)+Math.abs(v);if(m>1)return -1;if(m>0.86&&m<0.95)return 0.75;if(m<0.74)return 0.1+0.9*(1-m/0.74);return 0;},
+ mandala(u,v){const r=Math.hypot(u,v);if(r>1)return -1;const th=Math.atan2(v,u);
+  if(r<0.13)return 0.5+0.5*dome(r,0.13);if(r<0.17)return 0;
+  if(r<0.5){const c=Math.abs(Math.cos(6*th)),R=0.17+0.31*(0.35+0.65*c);if(r<R)return 0.25+0.65*Math.sin(Math.PI*(r-0.17)/(R-0.17+1e-6))*(0.5+0.5*c);return 0;}
+  if(r<0.55)return 0.75;
+  if(r<0.93){const c=Math.abs(Math.cos(8*th+Math.PI/2)),R=0.55+0.37*(0.3+0.7*c);if(r<R)return 0.2+0.65*Math.sin(Math.PI*(r-0.55)/(R-0.55+1e-6));return 0;}
+  return 0.75;},
+ sun(u,v){const r=Math.hypot(u,v);if(r>1)return -1;if(r<0.3)return 0.3+0.7*dome(r,0.3);if(r<0.36)return 0;
+  const th=Math.atan2(v,u),t=tri(th*16/(2*Math.PI)+0.5),R=0.36+0.6*t;if(r<R)return 0.2+0.7*t*(1-(r-0.36)/(0.62));return 0;},
+ vine(u,v,asp){if(Math.abs(u)>1||Math.abs(v)>1)return -1;if(Math.abs(v)>0.9)return 0.55;if(Math.abs(v)>0.84)return 0;
+  const x=u*asp,waves=Math.max(1,Math.round(asp/1.3)),per=2*asp/waves,ph=(x+asp)/per*2*Math.PI,sy=0.36*Math.sin(ph);
+  const slope=0.36*Math.cos(ph)*2*Math.PI/per,dy=Math.abs(v-sy)/Math.sqrt(1+slope*slope),sw=0.07;
+  let h=dy<sw?0.5+0.4*Math.sqrt(1-(dy/sw)**2):0;
+  const kc=Math.round((x+asp)/(per/2)-0.25);
+  for(let k=kc-1;k<=kc+1;k++){const xp=-asp+per*(0.25+k/2),sg=(k%2===0)?1:-1,yp=sg*0.36;
+   h=Math.max(h,leafF(x,v,xp,yp,sg>0?-0.95:0.95,0.72,0.2),leafF(x,v,xp,yp,sg>0?-2.2:2.2,0.62,0.17));
+   const xb=-asp+per*k/2,bb=Math.hypot(x-xb,v+sg*0.55);if(bb<0.13)h=Math.max(h,0.3+0.6*dome(bb,0.13));}
+  return h;}
+};
+const CMOT={
+ fan(u,v){const r=Math.hypot(u,v);if(r>1)return -1;if(r>0.86&&r<0.95)return 0.75;if(r<0.22)return 0.4+0.6*dome(r,0.22);if(r<0.27)return 0;
+  const th=Math.atan2(v,u),c=Math.abs(Math.sin(10*th)),R=0.27+0.55*(0.3+0.7*c);if(r<R)return 0.2+0.75*Math.sin(Math.PI*(0.1+0.9*(r-0.27)/(R-0.27)))*(0.55+0.45*c);return 0;},
+ leaf(u,v){const r=Math.hypot(u,v);if(r>1)return -1;let h=leafF(u,v,0.04,0.04,Math.PI/4,0.95,0.2);
+  h=Math.max(h,leafF(u,v,0.1,0.1,0.28,0.72,0.15),leafF(u,v,0.1,0.1,Math.PI/2-0.28,0.72,0.15));const b=Math.hypot(u-0.13,v-0.13);if(b<0.1)h=Math.max(h,0.3+0.7*dome(b,0.1));return h;},
+ arcs(u,v){const r=Math.hypot(u,v);if(r>1)return -1;if(r<0.18)return 0.4+0.6*dome(r,0.18);const f=tri(r*4.5);return f>0.55?0.25+0.6*(f-0.55)/0.45:0;}
+};
+
+/* ---------- image helpers ---------- */
+function loadImg(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file);const im=new Image();
+ im.onload=()=>{const sc=Math.min(1,1600/Math.max(im.width,im.height));const w=Math.max(2,Math.round(im.width*sc)),h=Math.max(2,Math.round(im.height*sc));
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data,lum=new Float32Array(w*h);let col=0,mid=0;
+  for(let i=0;i<w*h;i++){const r=d[4*i],g=d[4*i+1],b=d[4*i+2];const l=(0.299*r+0.587*g+0.114*b)/255;lum[i]=l;col+=(Math.abs(r-g)+Math.abs(g-b)+Math.abs(b-r))/510;if(l>0.18&&l<0.82)mid++;}
+  URL.revokeObjectURL(url);res({w,h,lum,name:file.name,type:file.type||'',ow:im.width,oh:im.height,colorful:col/(w*h),mid:mid/(w*h),url:c.toDataURL('image/png'),cache:{}});};
+ im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('bad'));};im.src=url;});}
+
+function getT(img,inv,blur,gamma){const key=inv+'|'+blur+'|'+gamma;if(img.cache[key])return img.cache[key];
+ let t=new Float32Array(img.w*img.h);for(let i=0;i<t.length;i++)t[i]=inv?img.lum[i]:1-img.lum[i];
+ t=blurArr(t,img.w,img.h,Math.round(blur*img.w/800));
+ if(gamma!==1)for(let i=0;i<t.length;i++)t[i]=Math.pow(clamp(t[i],0,1),gamma);
+ img.cache={};img.cache[key]=t;return t;}
+function samp(a,w,h,s,q){const x=clamp(s*w-0.5,0,w-1),y=clamp(q*h-0.5,0,h-1),x0=x|0,y0=y|0,x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1),fx=x-x0,fy=y-y0;
+ return (a[y0*w+x0]*(1-fx)+a[y0*w+x1]*fx)*(1-fy)+(a[y1*w+x0]*(1-fx)+a[y1*w+x1]*fx)*fy;}
+
+/* ---------- build: furniture part ---------- */
+function buildPart(p,res,margin){
+ const M=margin??Math.max(12,TOOLS.c.dia+8);
+ const G=makeGrid(p.W,p.H,res,M),{gw,gh}=G,N=gw*gh,ipx=1/res;
+ const shape=new Uint8Array(N);
+ for(let i=0;i<gw;i++){const x=G.X(i);if(x<0||x>p.W)continue;const ty=topY(p,x),by=botY(p,x);
+  for(let j=0;j<gh;j++){const y=G.Y(j);if(y<by||y>ty||y<0||y>p.H)continue;if(p.radius>0&&!cornerOK(p,x,y))continue;shape[j*gw+i]=1;}}
+ const S=signedDist(shape,gw,gh);
+ const relief=new Float32Array(N),jali=new Uint8Array(N),grooves=[],drills=[];
+ for(let b=0;b<(p.borders|0);b++){const d=p.bInset+b*p.bGap;for(const pts of loopsAt(G,S,d*ipx,0.06,50))grooves.push({pts,depth:p.bDepth,closed:true,kind:'border'});}
+ if(p.bevel&&p.bevWidth>0){const a=p.bevStart*ipx,w=p.bevWidth*ipx;for(let k=0;k<N;k++){const s=S[k];if(s>=a&&s<a+w){const t=(s-a)/w;relief[k]=Math.max(relief[k],p.bevDepth*(1-t));}}}
+ let inset=25;if(p.borders>0)inset=Math.max(inset,p.bInset+(p.borders-1)*p.bGap+12);if(p.bevel)inset=Math.max(inset,p.bevStart+p.bevWidth+10);
+ const ipxIn=inset*ipx;
+ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+ for(let j=0;j<gh;j++)for(let i=0;i<gw;i++)if(S[j*gw+i]>ipxIn){const x=G.X(i),y=G.Y(j);if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+ const found=x1>x0;const excl=[];const lineH=p.mStyle==='line'?new Float32Array(N):null;
+ const colTop=x=>{const i=clamp(Math.round(G.I(x)),0,gw-1);for(let j=0;j<gh;j++)if(S[j*gw+i]>ipxIn)return G.Y(j);return y1;};
+ const colBot=x=>{const i=clamp(Math.round(G.I(x)),0,gw-1);for(let j=gh-1;j>=0;j--)if(S[j*gw+i]>ipxIn)return G.Y(j);return y0;};
+ const imgFn=(img,flipU)=>{const t=getT(img,p.imgInv,0,p.imgGamma),th=p.imgThr/100;return (s,q)=>{let v=samp(t,img.w,img.h,s,q);if(p.imgBin)v=v>th?1:0;return v;};};
+ const paint=(cx,cy,hw,hh,fn,D,mapUV)=>{
+  const i0=Math.max(0,Math.floor(G.I(cx-hw))),i1=Math.min(gw-1,Math.ceil(G.I(cx+hw))),j0=Math.max(0,Math.floor(G.J(cy+hh))),j1=Math.min(gh-1,Math.ceil(G.J(cy-hh)));
+  for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*gw+i;if(S[k]<=ipxIn)continue;const uv=mapUV(G.X(i),G.Y(j));if(!uv)continue;const h=fn(uv[0],uv[1]);if(h<0)continue;
+   if(lineH){if(h>lineH[k])lineH[k]=h;continue;}
+   const d=p.mStyle==='relief'?(1-h)*D:h*D;if(d>relief[k])relief[k]=d;}};
+ if(p.motif!=='none'&&found&&!(p.motif==='image'&&!DIMG)){
+  const n=Math.max(1,p.mN|0),ih=y1-y0,cx=(x0+x1)/2,mw=Math.min(p.mW,x1-x0),mh=Math.min(p.mH,ih/n*1.02);
+  let fn;
+  if(p.motif==='image'){const f=imgFn(DIMG);fn=(u,v)=>{const t=f((u+1)/2,(1-v)/2);return p.mStyle==='relief'?1-t:t;};}
+  else if(p.motif==='vine'){const asp=mw/Math.max(1,mh);fn=(u,v)=>MOT.vine(u,v,asp);}
+  else fn=MOT[p.motif];
+  for(let k=0;k<n;k++){const cy=n===1?(y0+y1)/2+p.mPos/100*(ih-mh)/2:y0+ih*(k+0.5)/n;
+   paint(cx,cy,mw/2,mh/2,fn,p.mDepth,(x,y)=>{const u=(x-cx)/(mw/2),v=(y-cy)/(mh/2);return Math.abs(u)<=1&&Math.abs(v)<=1?[u,v]:null;});
+   excl.push([cx-mw/2-10,cy-mh/2-10,cx+mw/2+10,cy+mh/2+10]);}
+ }
+ if(p.corner!=='none'&&found&&!(p.corner==='image'&&!DIMG)){
+  const cs=Math.min(p.cS,(x1-x0)/2.2,(y1-y0)/2.2);let fn;
+  if(p.corner==='image'){const f=imgFn(DIMG);fn=(u,v)=>{if(u>1||v>1)return -1;const t=f(u,v);return p.mStyle==='relief'?1-t:t;};}
+  else fn=CMOT[p.corner];
+  const tl=Math.min(colTop(x0+2),colTop(x0+cs)),tr=Math.min(colTop(x1-2),colTop(x1-cs)),bl=Math.max(colBot(x0+2),colBot(x0+cs)),br=Math.max(colBot(x1-2),colBot(x1-cs));
+  for(const [cx,cy,sx,sy] of [[x0,bl,1,1],[x1,br,-1,1],[x0,tl,1,-1],[x1,tr,-1,-1]]){
+   paint(cx+sx*cs/2,cy+sy*cs/2,cs/2,cs/2,fn,p.cDepth,(x,y)=>{const u=(x-cx)*sx/cs,v=(y-cy)*sy/cs;return u>=0&&v>=0&&u<=1&&v<=1?[u,v]:null;});
+   excl.push([Math.min(cx,cx+sx*cs)-8,Math.min(cy,cy+sy*cs)-8,Math.max(cx,cx+sx*cs)+8,Math.max(cy,cy+sy*cs)+8]);}
+ }
+ if(lineH){const lv=0.12;for(const pts of loopsAt(G,lineH,lv,0.06,3))grooves.push({pts,depth:Math.min(p.mDepth,3),closed:true,kind:'line'});}
+ if(p.jali!=='none'){const mpx=p.jMargin*ipx,c=Math.max(8,p.jCell),cx=p.W/2,cy=found?(y0+y1)/2:p.H/2;const cellOK=new Map();
+  for(let j=0;j<gh;j++)for(let i=0;i<gw;i++){const k=j*gw+i;if(S[k]<=mpx)continue;const x=G.X(i),y=G.Y(j);
+   if(p.jali==='full'){if(p.jAvoid&&excl.some(r=>x>r[0]&&x<r[2]&&y>r[1]&&y<r[3]))continue;jali[k]=1;continue;}
+   const u=(x-cx)/c,v=(y-cy)/c,ru=Math.round(u),rv=Math.round(v),fu=u-ru,fv=v-rv;if(!jaliPat(p.jali,fu,fv,u,v))continue;
+   const ccx=cx+ru*c,ccy=cy+rv*c,ck=ru*100003+rv;let ok=cellOK.get(ck);
+   if(ok===undefined){const ci=clamp(Math.round(G.I(ccx)),0,gw-1),cj=clamp(Math.round(G.J(ccy)),0,gh-1);ok=S[cj*gw+ci]*res>p.jMargin+c*0.42;
+    if(ok&&p.jAvoid)ok=!excl.some(r=>ccx>r[0]-c*0.45&&ccx<r[2]+c*0.45&&ccy>r[1]-c*0.45&&ccy<r[3]+c*0.45);cellOK.set(ck,ok);}
+   if(ok)jali[k]=1;}}
+ const nh=p.handles|0;if(nh>0){const xs=nh===1?[p.W/2]:[p.W/2-p.hSpace/2,p.W/2+p.hSpace/2];for(const x of xs)drills.push({x,y:p.hY,d:p.hDia});}
+ return {G,gw,gh,res,M,W:p.W,H:p.H,T:p.T,shape,S,relief,grooves,jali,drills,cut:{on:!!p.cutOn,tabs:p.tabs|0,tabH:p.tabH,tabW:p.tabW},inner:found?[x0,y0,x1,y1]:null};}
+function jaliPat(t,fu,fv,u,v){switch(t){
+ case 'circle':return fu*fu+fv*fv<0.31*0.31;
+ case 'diamond':return Math.abs(fu)+Math.abs(fv)<0.38;
+ case 'square':return Math.max(Math.abs(fu),Math.abs(fv))<0.32;
+ case 'quatre':{const r=Math.hypot(fu,fv),th=Math.atan2(fv,fu);return r<0.19+0.15*Math.abs(Math.cos(2*th));}
+ case 'star':{const r=Math.hypot(fu,fv),th=Math.atan2(fv,fu);return r<0.15+0.21*tri(th*6/(2*Math.PI));}
+ case 'slot':{const s=fv-0.12*Math.sin(2*Math.PI*u);return Math.abs(s)<0.13&&Math.abs(fu)<0.42;}
+ default:return false;}}
+const JALI_HOLE={circle:0.62,diamond:0.54,square:0.64,quatre:0.38,star:0.3,slot:0.26,full:9};
+
+/* ---------- build: image → design ---------- */
+function buildImage(q,res,margin){
+ const M=margin??Math.max(12,TOOLS.c.dia+8);
+ const G=makeGrid(q.W,q.H,res,M),{gw,gh}=G,N=gw*gh;const t=new Float32Array(N);
+ if(IIMG){const tt=getT(IIMG,q.inv,q.blur,q.gamma);for(let j=0;j<gh;j++){const y=G.Y(j);if(y<0||y>q.H)continue;for(let i=0;i<gw;i++){const x=G.X(i);if(x<0||x>q.W)continue;t[j*gw+i]=samp(tt,IIMG.w,IIMG.h,x/q.W,1-y/q.H);}}}
+ const thr=q.thr/100,shape=new Uint8Array(N);
+ const sil=q.sil||q.mode==='cutonly';
+ for(let j=0;j<gh;j++){const y=G.Y(j);for(let i=0;i<gw;i++){const x=G.X(i),k=j*gw+i;if(sil)shape[k]=t[k]>thr?1:0;else shape[k]=(x>=0&&x<=q.W&&y>=0&&y<=q.H)?1:0;}}
+ const S=signedDist(shape,gw,gh),relief=new Float32Array(N),grooves=[];
+ if(q.mode==='relief')for(let k=0;k<N;k++)relief[k]=shape[k]?t[k]*q.depth:0;
+ else if(q.mode==='pocket')for(let k=0;k<N;k++)relief[k]=shape[k]&&t[k]>thr?q.depth:0;
+ else if(q.mode==='outline'&&IIMG)for(const pts of loopsAt(G,t,thr,0.06,2))grooves.push({pts,depth:q.depth,closed:true,kind:'line'});
+ if(sil&&q.mode!=='cutonly'&&q.mode!=='relief'){}
+ return {G,gw,gh,res,M,W:q.W,H:q.H,T:q.T,shape,S,relief,grooves,jali:new Uint8Array(N),drills:[],cut:{on:sil||q.panelCut,tabs:q.tabs|0,tabH:q.tabH,tabW:q.tabW},inner:null,tfield:t};}
+
+
+
+
+/* ---------- toolpath geometry ---------- */
+function anyOf(a){for(let i=0;i<a.length;i++)if(a[i])return true;return false;}
+function tpGeom(D,T){const g={cut:[],jaliLoops:[],jaliS:null,jaliR:0};const eps=Math.min(0.08,D.res*0.3);
+ if(D.cut.on){const r=T.c.dia/2/D.res;g.cut=loopsAt(D.G,D.S,-r,eps,20).map(p=>area(p)>0?p.reverse():p);}
+ if(anyOf(D.jali)){g.jaliS=signedDist(D.jali,D.gw,D.gh);g.jaliR=T.j.dia/2/D.res;g.jaliLoops=loopsAt(D.G,g.jaliS,g.jaliR,eps,0.5).map(p=>area(p)<0?p.reverse():p);}
+ return g;}
+
+/* ===================== G-CODE ===================== */
+function fmt(v){let s=(Math.round(v*1000)/1000).toFixed(3).replace(/\.?0+$/,'');if(s==='-0'||s==='')s='0';return s;}
+class GW{constructor(cfg,D,title,tool,rpm){this.c=cfg;this.L=[];this.ox=cfg.origin==='center'?-D.W/2:0;this.oy=cfg.origin==='center'?-D.H/2:0;
+  this.x=0;this.y=0;this.z=cfg.safe;this.f=null;this.cutLen=0;this.time=0;
+  if(cfg.cm)this.L.push('('+title+')','(Tool: '+tool+')','(Part '+fmt(D.W)+' x '+fmt(D.H)+' mm, thickness '+fmt(D.T)+' mm)','(Z0 = top surface, XY0 = '+(cfg.origin==='center'?'center':'bottom-left corner')+')','(Made with Noksha CNC)');
+  this.L.push('G21','G90','G17','G0 Z'+fmt(cfg.safe));if(cfg.m3)this.L.push('M3 S'+Math.round(rpm));}
+ rz(z){if(this.z===z)return;this.time+=Math.abs(z-this.z)/3000;this.L.push('G0 Z'+fmt(z));this.z=z;}
+ rxy(x,y){const X=x+this.ox,Y=y+this.oy;if(fmt(X)===fmt(this.x)&&fmt(Y)===fmt(this.y))return;this.time+=Math.hypot(X-this.x,Y-this.y)/6000;this.L.push('G0 X'+fmt(X)+' Y'+fmt(Y));this.x=X;this.y=Y;}
+ travel(x,y){this.rz(this.c.safe);this.rxy(x,y);}
+ hop(x,y){const d=Math.hypot(x+this.ox-this.x,y+this.oy-this.y);if(d>40)this.travel(x,y);else{this.rz(Math.max(this.c.ret,this.z>this.c.ret?this.c.ret:this.c.ret));this.rxy(x,y);}}
+ lin(x,y,z,f){let s='G1',nx=this.x,ny=this.y,nz=this.z;
+  if(x!=null){const X=x+this.ox;if(fmt(X)!==fmt(this.x)){s+=' X'+fmt(X);nx=X;}}
+  if(y!=null){const Y=y+this.oy;if(fmt(Y)!==fmt(this.y)){s+=' Y'+fmt(Y);ny=Y;}}
+  if(z!=null&&fmt(z)!==fmt(this.z)){s+=' Z'+fmt(z);nz=z;}
+  if(s==='G1')return;if(f!==this.f){s+=' F'+Math.round(f);this.f=f;}
+  const d=Math.hypot(nx-this.x,ny-this.y,nz-this.z);this.cutLen+=d;this.time+=d/f;this.x=nx;this.y=ny;this.z=nz;this.L.push(s);}
+ plunge(z,f){this.lin(null,null,z,f);}
+ end(){this.rz(this.c.safe);if(this.c.m3)this.L.push('M5');this.L.push('G0 X0 Y0','M30');return this.L.join('\n')+'\n';}}
+function steps(depth,pass){const n=Math.max(1,Math.ceil(depth/Math.max(0.2,pass)-1e-6));return Array.from({length:n},(_,k)=>(k+1)*depth/n);}
+
+function opGroove(D,t,cfg){const g=new GW(cfg,D,'Border / line engraving (V-carve)',`V-bit ${t.vang} deg`,t.rpm);
+ const items=D.grooves.slice();let cx=0,cy=0;const out=[];
+ while(items.length){let bi=0,bd=1e18;for(let i=0;i<items.length;i++){const p=items[i].pts[0];const d=(p[0]-cx)**2+(p[1]-cy)**2;if(d<bd){bd=d;bi=i;}}const it=items.splice(bi,1)[0];out.push(it);cx=it.pts[0][0];cy=it.pts[0][1];}
+ for(const it of out){const pts=it.pts,lv=steps(it.depth,t.pass);g.hop(pts[0][0],pts[0][1]);
+  for(const zd of lv){g.plunge(-zd,t.plunge);for(let i=1;i<pts.length;i++)g.lin(pts[i][0],pts[i][1],null,t.feed);g.lin(pts[0][0],pts[0][1],null,t.feed);}
+  g.rz(cfg.ret);}
+ return g;}
+function opRelief(D,t,cfg){const g=new GW(cfg,D,'Relief / carving (raster)',`Ball-nose ${t.dia} mm`,t.rpm);
+ const {gw,gh,res,relief,G}=D;let maxD=0;for(let k=0;k<relief.length;k++)if(relief[k]>maxD)maxD=relief[k];
+ const minD=0.04,levels=Math.max(1,Math.ceil(maxD/t.pass-1e-6)),gap=Math.max(1,Math.round(t.dia*1.5/res));
+ for(let k=1;k<=levels;k++){const last=k===levels,lim=Math.min(k*t.pass,maxD),prev=(k-1)*t.pass,so=last?t.step:Math.max(t.step,t.dia*0.45),rs=Math.max(1,Math.round(so/res));let dir=1;
+  for(let j=0;j<gh;j+=rs){const o=j*gw,runs=[];let a=-1;const need=Math.max(prev+0.02,minD);
+   for(let i=0;i<gw;i++){if(relief[o+i]>need){if(a<0)a=i;}else if(a>=0){runs.push([a,i-1]);a=-1;}}
+   if(a>=0)runs.push([a,gw-1]);if(!runs.length)continue;
+   const mr=[runs[0].slice()];for(let q=1;q<runs.length;q++){const L=mr[mr.length-1];if(runs[q][0]-L[1]<=gap)L[1]=runs[q][1];else mr.push(runs[q].slice());}
+   const y=G.Y(j),seq=dir>0?mr:mr.slice().reverse();
+   const zAt=i=>{const d=relief[o+i];if(d<minD)return 0.3;return -Math.round(Math.min(d,lim)*100)/100;};
+   for(const [ra,rb] of seq){const s=dir>0?ra:rb,e=dir>0?rb:ra,st=dir;g.hop(G.X(s),y);let pz=zAt(s);g.plunge(pz,t.plunge);let lastE=s,prevI=s;
+    for(let i=s+st;st>0?i<=e:i>=e;i+=st){const z=zAt(i);if(z!==pz){if(prevI!==lastE)g.lin(G.X(prevI),y,pz,t.feed);g.lin(G.X(i),y,z,t.feed);lastE=i;pz=z;}prevI=i;}
+    if(prevI!==lastE)g.lin(G.X(prevI),y,pz,t.feed);g.rz(cfg.ret);}
+   dir=-dir;}}
+ return g;}
+function opJali(D,t,cfg,geo){const g=new GW(cfg,D,'Jali / through pockets',`Flat end mill ${t.dia} mm`,t.rpm);
+ const {gw,gh,res,G}=D,Sj=geo.jaliS,r=geo.jaliR,lv=steps(D.T+cfg.over,t.pass),rs=Math.max(1,Math.round(t.step/res));
+ for(const zd of lv){const z=-zd;let dir=1;
+  for(let j=0;j<gh;j+=rs){const o=j*gw,runs=[];let a=-1;for(let i=0;i<gw;i++){if(Sj[o+i]>=r){if(a<0)a=i;}else if(a>=0){runs.push([a,i-1]);a=-1;}}if(a>=0)runs.push([a,gw-1]);
+   const y=G.Y(j),seq=dir>0?runs:runs.slice().reverse();
+   for(const [ra,rb] of seq){const s=dir>0?ra:rb,e=dir>0?rb:ra;g.hop(G.X(s),y);g.plunge(z,t.plunge);g.lin(G.X(e),y,null,t.feed);g.rz(cfg.ret);}
+   if(runs.length)dir=-dir;}
+  for(const L of geo.jaliLoops){g.hop(L[0][0],L[0][1]);g.plunge(z,t.plunge);for(let i=1;i<L.length;i++)g.lin(L[i][0],L[i][1],null,t.feed);g.lin(L[0][0],L[0][1],null,t.feed);g.rz(cfg.ret);}}
+ return g;}
+function opDrill(D,t,cfg){const g=new GW(cfg,D,'Drill holes',`Bit ${t.dia} mm`,t.rpm),depth=D.T+cfg.over;
+ for(const h of D.drills){if(h.d<=t.dia+0.25){g.travel(h.x,h.y);g.rz(1);let z=0;while(z<depth-1e-6){z=Math.min(depth,z+t.pass);g.plunge(-z,t.plunge);g.rz(1);}g.rz(cfg.safe);}
+  else{const R=(h.d-t.dia)/2;g.travel(h.x+R,h.y);for(const zd of steps(depth,t.pass)){g.plunge(-zd,t.plunge);for(let a=1;a<=48;a++){const an=a/48*2*Math.PI;g.lin(h.x+R*Math.cos(an),h.y+R*Math.sin(an),null,t.feed);}}g.rz(cfg.safe);}}
+ return g;}
+function opCut(D,t,cfg,geo){const g=new GW(cfg,D,'Profile cut-out',`Flat end mill ${t.dia} mm`,t.rpm);
+ const depth=D.T+cfg.over,lv=steps(depth,t.pass),tabs=D.cut.tabs|0,tabTop=-(D.T-Math.min(D.cut.tabH,D.T-1));
+ const loops=geo.cut.slice().sort((a,b)=>Math.abs(area(a))-Math.abs(area(b)));
+ for(const L of loops){const cl=[...L,L[0]],per=perim(cl,false),useT=tabs>0&&per>tabs*(D.cut.tabW+t.dia)*2.5;g.travel(L[0][0],L[0][1]);
+  const half=(D.cut.tabW+t.dia)/2,cent=[];for(let k=0;k<tabs;k++)cent.push(per*(k+0.5)/tabs);const inTab=s=>cent.some(c=>Math.abs(s-c)<half);
+  for(const zd of lv){const z=-zd;
+   if(!(useT&&z<tabTop)){g.plunge(z,t.plunge);for(let i=1;i<cl.length;i++)g.lin(cl[i][0],cl[i][1],null,t.feed);}
+   else{g.plunge(z,t.plunge);let s=0;for(let q=1;q<cl.length;q++){const A=cl[q-1],B=cl[q],L2=Math.hypot(B[0]-A[0],B[1]-A[1]),n=Math.max(1,Math.ceil(L2/1.5));
+     for(let m=1;m<=n;m++){const f=m/n,ss=s+L2*f,zz=inTab(ss)?tabTop:z;g.lin(A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f,zz,zz<g.z?t.plunge:t.feed);}s+=L2;}}}
+  g.rz(cfg.safe);}
+ return g;}
+
+
+function grooveField(D,vang){const F=new Float32Array(D.gw*D.gh);const tn=Math.tan((vang||90)*Math.PI/360),G=D.G,res=D.res;
+ for(const g of D.grooves){const d=g.depth,rp=d*tn/res+1,pts=g.pts,n=pts.length;
+  for(let s=0;s<n;s++){const A=pts[s],B=pts[(s+1)%n];if(!g.closed&&s===n-1)break;
+   const ai=G.I(A[0]),aj=G.J(A[1]),bi=G.I(B[0]),bj=G.J(B[1]);
+   const i0=Math.max(0,Math.floor(Math.min(ai,bi)-rp)),i1=Math.min(D.gw-1,Math.ceil(Math.max(ai,bi)+rp)),j0=Math.max(0,Math.floor(Math.min(aj,bj)-rp)),j1=Math.min(D.gh-1,Math.ceil(Math.max(aj,bj)+rp));
+   const dx=bi-ai,dy=bj-aj,L2=dx*dx+dy*dy||1e-9;
+   for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){let t=((i-ai)*dx+(j-aj)*dy)/L2;t=clamp(t,0,1);const ex=ai+t*dx-i,ey=aj+t*dy-j,dist=Math.sqrt(ex*ex+ey*ey)*res,dep=d-dist/tn;const k=j*D.gw+i;if(dep>F[k])F[k]=dep;}}}
+ return F;}
+function imToCanvas(im){const c=document.createElement('canvas');c.width=im.width;c.height=im.height;c.getContext('2d').putImageData(im,0,0);return c;}
+function pointAt(cl,s){let acc=0;for(let i=1;i<cl.length;i++){const A=cl[i-1],B=cl[i],L=Math.hypot(B[0]-A[0],B[1]-A[1]);if(acc+L>=s){const f=(s-acc)/(L||1);return [A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f];}acc+=L;}return cl[cl.length-1];}
+function drawDrawing(ctx,D,geo,k,X,Y,dpr){
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+ const eps=Math.min(0.1,D.res*0.4);
+ const path=(p,col,w,closed=true,dash)=>{ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])));if(closed)ctx.closePath();ctx.strokeStyle=col;ctx.lineWidth=w*dpr;ctx.setLineDash(dash?dash.map(v=>v*dpr):[]);ctx.stroke();};
+ // relief outlines (motif drawn as lines)
+ const lv=[0.3,Math.max(0.6,maxOf(D.relief)*0.55)];
+ for(const l of lv)for(const p of loopsAt(D.G,D.relief,l,eps,1))path(p,'#555',0.8);
+ for(const g of D.grooves)path(g.pts,'#111',1.1);
+ if(anyOf(D.jali))for(const p of loopsAt(D.G,signedDist(D.jali,D.gw,D.gh),0,eps,0.5)){ctx.fillStyle='#d9d9d9';ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])));ctx.closePath();ctx.fill();path(p,'#111',1.1);}
+ for(const p of loopsAt(D.G,D.S,0,eps,10))path(p,'#000',2.2);
+ D.drills.forEach(h=>{const r=Math.max(2.5*dpr,h.d/2*k);ctx.beginPath();ctx.arc(X(h.x),Y(h.y),r,0,7);ctx.strokeStyle='#000';ctx.lineWidth=1.2*dpr;ctx.setLineDash([]);ctx.stroke();ctx.beginPath();ctx.moveTo(X(h.x)-r*1.8,Y(h.y));ctx.lineTo(X(h.x)+r*1.8,Y(h.y));ctx.moveTo(X(h.x),Y(h.y)-r*1.8);ctx.lineTo(X(h.x),Y(h.y)+r*1.8);ctx.lineWidth=0.6*dpr;ctx.stroke();});
+ // dimensions
+ ctx.setLineDash([]);ctx.strokeStyle='#b0401a';ctx.fillStyle='#b0401a';ctx.lineWidth=1*dpr;const fs=Math.max(10,Math.min(15,D.M*k/dpr*0.42))*dpr;ctx.font=`600 ${fs}px Hind Siliguri,sans-serif`;
+ const off=D.M*0.45;const arrow=(x1,y1,x2,y2)=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1),s=6*dpr;for(const [px,py,aa] of [[x1,y1,a],[x2,y2,a+Math.PI]]){ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+s*Math.cos(aa+0.4),py+s*Math.sin(aa+0.4));ctx.lineTo(px+s*Math.cos(aa-0.4),py+s*Math.sin(aa-0.4));ctx.closePath();ctx.fill();}};
+ arrow(X(0),Y(-off),X(D.W),Y(-off));ctx.textAlign='center';ctx.fillStyle='#fff';const tW=fmtU(D.W);const mw=ctx.measureText(tW).width+8*dpr;ctx.fillRect(X(D.W/2)-mw/2,Y(-off)-fs*0.7,mw,fs*1.3);ctx.fillStyle='#b0401a';ctx.fillText(tW,X(D.W/2),Y(-off)+fs*0.35);
+ arrow(X(-off),Y(0),X(-off),Y(D.H));ctx.save();ctx.translate(X(-off),Y(D.H/2));ctx.rotate(-Math.PI/2);const tH=fmtU(D.H);const mh=ctx.measureText(tH).width+8*dpr;ctx.fillStyle='#fff';ctx.fillRect(-mh/2,-fs*0.7,mh,fs*1.3);ctx.fillStyle='#b0401a';ctx.fillText(tH,0,fs*0.35);ctx.restore();
+ if(D.inner&&MODE==='design'){const [x0,y0,x1,y1]=D.inner;ctx.font=`${fs*0.8}px Hind Siliguri,sans-serif`;ctx.fillStyle='#777';ctx.textAlign='left';}
+ ctx.font=`${fs*0.85}px Hind Siliguri,sans-serif`;ctx.textAlign='left';ctx.fillStyle='#444';
+ const name=MODE==='design'?(PARTS[P.part]?.n||'প্যানেল'):'ছবির নকশা';ctx.fillText(name+' · পুরুত্ব '+fmtU(D.T,UNIT==='mm'?0:2),6*dpr,fs*1.1);}
+function maxOf(a){let m=0;for(let i=0;i<a.length;i++)if(a[i]>m)m=a[i];return m;}
+function designOutlines(){const G=LASTGEN,D=G.D,eps=0.05;const out={shape:loopsAt(D.G,D.S,0,eps,10),jali:anyOf(D.jali)?loopsAt(D.G,signedDist(D.jali,D.gw,D.gh),0,eps,0.5):[],relief:[]};
+ if(maxOf(D.relief)>0.05)out.relief=loopsAt(D.G,D.relief,0.3,eps,2);return out;}
+function makeSVG(){const G=LASTGEN,D=G.D,O=designOutlines();const W=D.W,H=D.H;
+ const pth=(p)=>'M'+p.map(q=>fmt(q[0])+' '+fmt(H-q[1])).join(' L')+' Z';
+ let s=`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${fmt(W)}mm" height="${fmt(H)}mm" viewBox="0 0 ${fmt(W)} ${fmt(H)}">\n`;
+ s+=`<g id="OUTLINE" fill="none" stroke="#d0281c" stroke-width="0.4">${O.shape.map(p=>`<path d="${pth(p)}"/>`).join('')}</g>\n`;
+ s+=`<g id="LINES_VCARVE" fill="none" stroke="#1d4fa3" stroke-width="0.3">${D.grooves.map(g=>`<path d="${pth(g.pts)}"/>`).join('')}</g>\n`;
+ s+=`<g id="RELIEF_AREA" fill="none" stroke="#e08a1c" stroke-width="0.25">${O.relief.map(p=>`<path d="${pth(p)}"/>`).join('')}</g>\n`;
+ s+=`<g id="JALI" fill="none" stroke="#1f8a4c" stroke-width="0.3">${O.jali.map(p=>`<path d="${pth(p)}"/>`).join('')}</g>\n`;
+ s+=`<g id="DRILL" fill="none" stroke="#7a2ea0" stroke-width="0.3">${D.drills.map(h=>`<circle cx="${fmt(h.x)}" cy="${fmt(H-h.y)}" r="${fmt(h.d/2)}"/>`).join('')}</g>\n</svg>\n`;return s;}
+function makeDXF(){const G=LASTGEN,D=G.D,O=designOutlines();const L=['0','SECTION','2','HEADER','9','$ACADVER','1','AC1009','9','$INSUNITS','70','4','0','ENDSEC','0','SECTION','2','ENTITIES'];
+ const poly=(p,layer)=>{L.push('0','POLYLINE','8',layer,'66','1','70','1','10','0','20','0','30','0');for(const q of p)L.push('0','VERTEX','8',layer,'10',fmt(q[0]),'20',fmt(q[1]),'30','0');L.push('0','SEQEND','8',layer);};
+ O.shape.forEach(p=>poly(p,'OUTLINE'));D.grooves.forEach(g=>poly(g.pts,'LINES_VCARVE'));O.relief.forEach(p=>poly(p,'RELIEF_AREA'));O.jali.forEach(p=>poly(p,'JALI'));
+ D.drills.forEach(h=>L.push('0','CIRCLE','8','DRILL','10',fmt(h.x),'20',fmt(h.y),'30','0','40',fmt(h.d/2)));
+ L.push('0','ENDSEC','0','EOF');return L.join('\r\n')+'\r\n';}
+function heightmapCanvas(){const G=LASTGEN,D=G.D;const i0=Math.max(0,Math.round(D.G.I(0))),i1=Math.min(D.gw-1,Math.round(D.G.I(D.W))),j0=Math.max(0,Math.round(D.G.J(D.H))),j1=Math.min(D.gh-1,Math.round(D.G.J(0)));
+ const w=i1-i0+1,h=j1-j0+1,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),im=x.createImageData(w,h);
+ let md=0.1;for(let k=0;k<D.relief.length;k++){const d=Math.max(D.relief[k],G.gF[k]);if(d>md)md=d;}if(anyOf(D.jali))md=Math.max(md,D.T);
+ for(let j=0;j<h;j++)for(let i=0;i<w;i++){const k=(j+j0)*D.gw+i+i0;let v;if(!D.shape[k])v=255;else if(D.jali[k])v=0;else v=255*(1-Math.max(D.relief[k],G.gF[k])/md);const o=4*(j*w+i);im.data[o]=im.data[o+1]=im.data[o+2]=Math.round(v);im.data[o+3]=255;}
+ x.putImageData(im,0,0);c._maxDepth=md;return c;}
+function canvasBlob(c){return new Promise(r=>c.toBlob(r,'image/png'));}
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRCT[(c^u8[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+async function deflate(u8){if(typeof CompressionStream==='undefined')return null;try{const cs=new CompressionStream('deflate-raw');const s=new Blob([u8]).stream().pipeThrough(cs);return new Uint8Array(await new Response(s).arrayBuffer());}catch(e){return null;}}
+async function makeZip(files){const enc=new TextEncoder();const parts=[],cen=[];let off=0;const d=new Date();
+ const dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(),tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+ for(const f of files){const name=enc.encode(f.name),data=f.data,crc=crc32(data);let comp=await deflate(data),method=8;if(!comp||comp.length>=data.length){comp=data;method=0;}
+  const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,method,true);h.setUint16(10,tm,true);h.setUint16(12,dt,true);h.setUint32(14,crc,true);h.setUint32(18,comp.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+  parts.push(new Uint8Array(h.buffer),name,comp);
+  const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,method,true);c.setUint16(12,tm,true);c.setUint16(14,dt,true);c.setUint32(16,crc,true);c.setUint32(20,comp.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+  cen.push(new Uint8Array(c.buffer),name);off+=30+name.length+comp.length;}
+ let cs=0;cen.forEach(a=>cs+=a.length);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+ return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'});}
+async function saveFile(name,blob){
+ if(DL){try{await DL.save({filename:name,data:blob});toast('সেভ হয়েছে ✅ '+name);return;}catch(e){const c=e&&e.code;if(c==='declined'){toast('ডাউনলোড বাতিল করা হয়েছে');return;}if(c==='rate_limited'){toast('একটু অপেক্ষা করে আবার চাপুন');return;}if(c==='too_large'){toast('ফাইল অনেক বড়। “দ্রুত” নির্ভুলতা বেছে আবার তৈরি করুন');return;}}}
+ try{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);toast('ডাউনলোড শুরু হয়েছে: '+name);}
+ catch(e){toast('এখানে ডাউনলোড করা যাচ্ছে না। “কপি” বাটন ব্যবহার করুন।');}}
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+/* ===================== BASICS ===================== */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const UF={mm:1,cm:10,in:25.4};
+const UNAME={mm:'মিমি',cm:'সেমি',in:'ইঞ্চি'};
+const bn=s=>String(s).replace(/[0-9]/g,d=>'০১২৩৪৫৬৭৮৯'[d]);
+const store={get(k,d){try{const v=localStorage.getItem('noksha_'+k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem('noksha_'+k,JSON.stringify(v));}catch(e){}}};
+let UNIT=store.get('unit','in');
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2600);}
+function uv(mm){const d=UNIT==='mm'?0:UNIT==='cm'?1:2;return Math.round(mm/UF[UNIT]*10**d)/10**d;}
+function fmtU(mm,dec){const v=mm/UF[UNIT];const d=dec??(UNIT==='mm'?0:UNIT==='cm'?1:2);return (Math.round(v*10**d)/10**d)+' '+UNAME[UNIT];}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ===================== DATA ===================== */
+const DEF={furn:'almirah',part:'door',W:450,H:1500,T:18,top:'flat',archH:120,waves:5,bottom:'flat',bArchH:60,radius:0,
+ borders:2,bInset:35,bGap:12,bDepth:3,bevel:false,bevStart:70,bevWidth:30,bevDepth:5,
+ motif:'rosette',mW:260,mH:260,mN:2,mPos:0,mDepth:5,mStyle:'relief',imgInv:false,imgBin:false,imgThr:50,imgGamma:1,
+ corner:'fan',cS:90,cDepth:4,jali:'none',jCell:60,jMargin:80,jAvoid:true,handles:0,hSpace:96,hY:90,hDia:5,
+ cutOn:true,tabs:4,tabH:3,tabW:8};
+let P=Object.assign({},DEF),BASE=Object.assign({},DEF);
+const QDEF={W:300,H:300,T:18,depth:5,lock:true,mode:'relief',thr:50,blur:1,gamma:1,inv:false,sil:false,panelCut:false,tabs:4,tabH:3,tabW:8};
+let Q=Object.assign({},QDEF);
+let DIMG=null,IIMG=null,MODE='design';
+let DIMS=store.get('dims',{});
+
+const FURN={
+ almirah:{n:'আলমারি',parts:['door','drawer','crown','side','plinth']},
+ bed:{n:'খাট',parts:['headboard','footboard','apron']},
+ dressing:{n:'ড্রেসিং টেবিল',parts:['mirror','drawer','dtop','crown']},
+ showcase:{n:'শোকেস',parts:['jalidoor','door','drawer','crown']},
+ table:{n:'টেবিল',parts:['ttop','apron','drawer']},
+ partition:{n:'দরজা ও পার্টিশন',parts:['door2','screen']},
+ custom:{n:'অন্য কিছু',parts:['custom']}
+};
+const PARTS={
+ door:{n:'পাল্লা',p:{W:450,H:1500,T:18,top:'flat',bottom:'flat',radius:0,borders:2,bInset:35,bGap:12,bDepth:3,bevel:false,motif:'rosette',mW:260,mH:260,mN:2,mPos:0,mDepth:5,corner:'fan',cS:90,jali:'none',handles:0,cutOn:true}},
+ drawer:{n:'ড্রয়ারের সামনে',p:{W:450,H:180,T:18,top:'flat',bottom:'flat',radius:0,borders:1,bInset:15,bGap:10,bDepth:2.5,bevel:false,motif:'vine',mW:290,mH:80,mN:1,mPos:0,mDepth:4,corner:'none',jali:'none',handles:2,hSpace:96,hY:90,hDia:5}},
+ crown:{n:'চাল (মাথার নকশা)',p:{W:900,H:260,T:18,top:'crown',archH:110,bottom:'flat',radius:0,borders:1,bInset:18,bDepth:2.5,bevel:false,motif:'lotus',mW:190,mH:110,mN:1,mPos:-20,mDepth:5,corner:'leaf',cS:70,cDepth:4,jali:'none',handles:0}},
+ side:{n:'সাইড প্যানেল',p:{W:500,H:1800,T:18,top:'flat',bottom:'flat',radius:0,borders:1,bInset:40,bGap:15,bDepth:3,bevel:true,bevStart:70,bevWidth:35,bevDepth:5,motif:'none',corner:'none',jali:'none',handles:0}},
+ plinth:{n:'নিচের পট্টি',p:{W:900,H:110,T:18,top:'flat',bottom:'scallop',bArchH:30,radius:0,borders:0,bevel:false,motif:'vine',mW:760,mH:55,mN:1,mPos:30,mDepth:3,corner:'none',jali:'none',handles:0}},
+ headboard:{n:'খাটের মাথা',p:{W:1620,H:1000,T:25,top:'carch',archH:180,bottom:'flat',radius:0,borders:2,bInset:50,bGap:14,bDepth:3,bevel:false,motif:'mandala',mW:360,mH:360,mN:1,mPos:15,mDepth:6,corner:'fan',cS:150,cDepth:5,jali:'none',handles:0}},
+ footboard:{n:'খাটের পায়ের দিক',p:{W:1620,H:500,T:25,top:'arch',archH:80,bottom:'flat',radius:0,borders:1,bInset:40,bDepth:3,bevel:false,motif:'vine',mW:1100,mH:120,mN:1,mPos:0,mDepth:5,corner:'leaf',cS:90,jali:'none',handles:0}},
+ apron:{n:'অ্যাপ্রন / স্কার্ট',p:{W:1200,H:200,T:20,top:'flat',bottom:'arch',bArchH:70,radius:0,borders:0,bevel:false,motif:'vine',mW:800,mH:75,mN:1,mPos:40,mDepth:4,corner:'none',jali:'none',handles:0}},
+ mirror:{n:'আয়নার ফ্রেম',p:{W:600,H:900,T:18,top:'arch',archH:150,bottom:'flat',radius:0,borders:1,bInset:20,bDepth:2.5,bevel:false,motif:'none',corner:'none',jali:'full',jMargin:85,jAvoid:false,handles:0}},
+ dtop:{n:'ড্রেসিং টপ',p:{W:900,H:450,T:18,top:'flat',bottom:'flat',radius:30,borders:1,bInset:25,bDepth:2.5,bevel:false,motif:'none',corner:'fan',cS:80,jali:'none',handles:0}},
+ jalidoor:{n:'জালি পাল্লা',p:{W:400,H:900,T:18,top:'flat',bottom:'flat',radius:0,borders:1,bInset:20,bDepth:2.5,bevel:false,motif:'rosette',mW:170,mH:170,mN:1,mPos:0,mDepth:5,corner:'none',jali:'diamond',jCell:55,jMargin:50,jAvoid:true,handles:0}},
+ screen:{n:'জালি পার্টিশন',p:{W:600,H:1200,T:18,top:'arch',archH:200,bottom:'flat',radius:0,borders:1,bInset:20,bDepth:2.5,bevel:false,motif:'none',corner:'none',jali:'quatre',jCell:70,jMargin:50,handles:0}},
+ door2:{n:'ঘরের দরজা',p:{W:800,H:2000,T:30,top:'flat',bottom:'flat',radius:0,borders:1,bInset:40,bGap:15,bDepth:3,bevel:true,bevStart:90,bevWidth:40,bevDepth:6,motif:'diamond',mW:300,mH:300,mN:2,mPos:0,mDepth:6,corner:'none',jali:'none',handles:0}},
+ ttop:{n:'টেবিলের টপ',p:{W:1200,H:700,T:25,top:'flat',bottom:'flat',radius:40,borders:2,bInset:40,bGap:12,bDepth:3,bevel:false,motif:'mandala',mW:300,mH:300,mN:1,mPos:0,mDepth:5,corner:'fan',cS:120,jali:'none',handles:0}},
+ custom:{n:'কাস্টম প্যানেল',p:{W:600,H:600,T:18,top:'flat',bottom:'flat',radius:0,borders:1,bInset:25,bDepth:2.5,bevel:false,motif:'rosette',mW:300,mH:300,mN:1,mPos:0,corner:'none',jali:'none',handles:0}}
+};
+const SZ={door:[[18,60],[18,72],[24,72],[15,48]],drawer:[[18,7],[24,8],[36,8]],crown:[[36,10],[48,12],[72,14]],side:[[20,72],[22,78]],plinth:[[36,4],[48,4]],headboard:[[64,42],[76,44],[52,40]],footboard:[[64,20],[76,20]],apron:[[48,8],[60,8]],mirror:[[24,36],[20,30],[30,42]],dtop:[[36,18],[42,20]],jalidoor:[[16,36],[18,48]],screen:[[24,48],[36,72]],door2:[[32,80],[36,84]],ttop:[[48,30],[60,36]],custom:[[24,24],[36,24],[12,12]]};
+const THK=[12,18,25,30];
+const SAMPLES=[
+ {f:'almirah',pt:'door',n:'ফুলেল পাল্লা',o:{}},
+ {f:'almirah',pt:'door',n:'রেইজড প্যানেল পাল্লা',o:{borders:1,bInset:25,bevel:true,bevStart:60,bevWidth:35,bevDepth:5,motif:'diamond',mW:200,mH:200,mN:2,corner:'none'}},
+ {f:'almirah',pt:'door',n:'তারা-খচিত পাল্লা',o:{motif:'star',mW:190,mH:190,mN:3,corner:'arcs',cS:80}},
+ {f:'almirah',pt:'door',n:'মান্ডালা পাল্লা',o:{motif:'mandala',mW:340,mH:340,mN:1,corner:'fan',cS:110}},
+ {f:'almirah',pt:'door',n:'খিলান পাল্লা',o:{top:'arch',archH:140,motif:'lotus',mW:270,mH:210,mN:1,mPos:-35,corner:'none'}},
+ {f:'almirah',pt:'door',n:'2D লাইনের পাল্লা',o:{motif:'mandala',mStyle:'line',mW:300,mH:300,mN:1,corner:'leaf',cS:100,borders:3,bGap:10}},
+ {f:'almirah',pt:'drawer',n:'লতা-পাতার ড্রয়ার',o:{}},
+ {f:'almirah',pt:'drawer',n:'ফুলেল ড্রয়ার',o:{motif:'rosette',mW:125,mH:125,corner:'none',borders:2,bInset:12,bGap:8}},
+ {f:'almirah',pt:'crown',n:'পদ্মের চাল',o:{}},
+ {f:'almirah',pt:'crown',n:'জালির চাল',o:{motif:'sun',mW:150,mH:150,mPos:-15,corner:'none',jali:'circle',jCell:40,jMargin:30,jAvoid:true}},
+ {f:'almirah',pt:'crown',n:'ঢেউ চাল',o:{top:'wave',archH:70,waves:5,motif:'vine',mW:700,mH:90,mPos:-40,corner:'none'}},
+ {f:'almirah',pt:'side',n:'রেইজড সাইড প্যানেল',o:{}},
+ {f:'bed',pt:'headboard',n:'রাজকীয় খাটের মাথা',o:{}},
+ {f:'bed',pt:'headboard',n:'পদ্মের খাটের মাথা',o:{top:'crown',archH:220,motif:'lotus',mW:430,mH:310,mPos:10,corner:'leaf',cS:150}},
+ {f:'bed',pt:'headboard',n:'লতা-পাতার খাটের মাথা',o:{top:'arch',archH:150,motif:'vine',mW:1100,mH:170,mPos:0,corner:'none',borders:1}},
+ {f:'bed',pt:'headboard',n:'জালি খাটের মাথা',o:{jali:'quatre',jCell:80,jMargin:70,motif:'rosette',mW:300,mH:300,corner:'none'}},
+ {f:'bed',pt:'footboard',n:'খাটের পায়ের দিক',o:{}},
+ {f:'bed',pt:'apron',n:'খিলান অ্যাপ্রন',o:{}},
+ {f:'dressing',pt:'mirror',n:'খিলান আয়নার ফ্রেম',o:{corner:'leaf',cS:70}},
+ {f:'dressing',pt:'mirror',n:'মাঝে-খিলান আয়না',o:{top:'carch',archH:200,corner:'fan',cS:80}},
+ {f:'dressing',pt:'drawer',n:'ড্রেসিং ড্রয়ার',o:{}},
+ {f:'dressing',pt:'dtop',n:'ড্রেসিং টপ',o:{}},
+ {f:'showcase',pt:'jalidoor',n:'ডায়মন্ড জালি পাল্লা',o:{}},
+ {f:'showcase',pt:'jalidoor',n:'তারা জালি পাল্লা',o:{jali:'star',jCell:50,motif:'none'}},
+ {f:'showcase',pt:'door',n:'শোকেসের পাল্লা',o:{H:1000,mN:1,motif:'star',mW:220,mH:220}},
+ {f:'showcase',pt:'crown',n:'শোকেসের চাল',o:{top:'arch',archH:90,motif:'sun',mW:150,mH:150,corner:'none'}},
+ {f:'table',pt:'ttop',n:'মান্ডালা টেবিল টপ',o:{}},
+ {f:'table',pt:'apron',n:'টেবিলের অ্যাপ্রন',o:{}},
+ {f:'table',pt:'drawer',n:'টেবিলের ড্রয়ার',o:{}},
+ {f:'partition',pt:'screen',n:'চার-পাপড়ি জালি',o:{}},
+ {f:'partition',pt:'screen',n:'ডায়মন্ড জালি',o:{jali:'diamond',jCell:60,top:'carch'}},
+ {f:'partition',pt:'door2',n:'রেইজড দরজা',o:{}},
+ {f:'partition',pt:'door2',n:'মান্ডালা দরজা',o:{bevel:false,motif:'mandala',mW:420,mH:420,mN:2,corner:'fan',cS:120,borders:2}},
+ {f:'custom',pt:'custom',n:'ফুলেল প্যানেল',o:{}},
+ {f:'custom',pt:'custom',n:'মান্ডালা প্যানেল',o:{motif:'mandala',corner:'fan',cS:90,borders:2}}
+];
+const TOPS=[['flat','সমান'],['arch','খিলান'],['carch','মাঝে খিলান'],['wave','ঢেউ'],['crown','চাল / ক্রাউন'],['gable','ত্রিকোণ'],['step','ধাপ']];
+const BOTS=[['flat','সমান'],['arch','খিলান কাটা'],['scallop','ঢেউ কাটা']];
+const BORDERS=[
+ {n:'বর্ডার নেই',o:{borders:0,bevel:false}},{n:'এক লাইন',o:{borders:1,bevel:false}},{n:'দুই লাইন',o:{borders:2,bevel:false}},
+ {n:'তিন লাইন',o:{borders:3,bevel:false}},{n:'রেইজড প্যানেল',o:{borders:0,bevel:true}},{n:'লাইন + রেইজড',o:{borders:1,bevel:true}}];
+const MOTIFS=[['none','নকশা নেই'],['rosette','ফুল'],['lotus','পদ্ম'],['star','তারা'],['diamond','ডায়মন্ড'],['mandala','মান্ডালা'],['sun','সূর্যমুখী'],['vine','লতা-পাতা'],['image','নিজের ছবি']];
+const STYLES=[['relief','3D রিলিফ','নকশা উঁচু, চারপাশ নিচু'],['engrave','খোদাই','নকশাটা নিচু করে কাটা'],['line','2D লাইন','শুধু রেখা (V-বিট)']];
+const CORNERS=[['none','কোণায় কিছু নেই'],['fan','পাখা-ফুল'],['leaf','পাতা'],['arcs','রিং'],['image','নিজের ছবি']];
+const JALIS=[['none','জালি নেই'],['circle','গোল'],['diamond','ডায়মন্ড'],['square','চৌকো'],['quatre','চার-পাপড়ি'],['star','তারা'],['slot','ঢেউ-স্লট'],['full','পুরো ভেতর ফাঁকা']];
+const IMODES=[['relief','3D রিলিফ','গ্রেস্কেল ছবি উঁচু-নিচু হবে'],['pocket','কালো অংশ খোদাই','লেখা/লোগো সমান গভীরে'],['outline','শুধু লাইন (2D)','কিনারা বরাবর V-বিট'],['cutonly','কেটে আলাদা','লোগো/অক্ষর কেটে বের করা']];
+
+/* ===================== MACHINE CONFIG ===================== */
+const MATS={mdf:['MDF',1],ply:['প্লাইউড',0.9],soft:['নরম কাঠ',0.95],mahog:['মেহগনি',0.82],teak:['সেগুন',0.72],hard:['শাল/গর্জন',0.58]};
+const CTRLS={richauto:{n:'Richauto DSP',d:'হাতের কন্ট্রোলার (A11/A18), USB',ext:'nc',cm:false},ncstudio:{n:'NcStudio / Weihong',d:'কম্পিউটার-চালিত',ext:'nc',cm:true},mach3:{n:'Mach3 / Mach4',d:'কম্পিউটার-চালিত',ext:'tap',cm:true},grbl:{n:'GRBL',d:'ছোট ডেস্কটপ মেশিন',ext:'gcode',cm:true},other:{n:'অন্যান্য / জানি না',d:'সাধারণ G-code',ext:'nc',cm:false}};
+const TBASE={g:{dia:6,vang:90,feed:2200,plunge:700,rpm:18000,pass:3},r:{dia:3,step:0.5,feed:3200,plunge:900,rpm:18000,pass:3},j:{dia:6,step:2.5,feed:2200,plunge:700,rpm:18000,pass:4.5},d:{dia:5,feed:600,plunge:500,rpm:16000,pass:5},c:{dia:6,feed:2000,plunge:700,rpm:18000,pass:4.5}};
+const TOPS_INFO={g:['বর্ডার ও 2D লাইন','V-বিট'],r:['রিলিফ / খোদাই','বল-নোজ'],j:['জালি কাটিং','ফ্ল্যাট বিট'],d:['হ্যান্ডেল ছিদ্র','ড্রিল/ফ্ল্যাট বিট'],c:['আউটলাইন কেটে আলাদা','ফ্ল্যাট বিট']};
+const TFIELDS={feed:'ফিড (মিমি/মিনিট)',plunge:'নামার ফিড',rpm:'স্পিন্ডল RPM',pass:'প্রতি পাসে গভীরতা (মিমি)',step:'স্টেপওভার (মিমি)'};
+const BITCH={g:[[60,'৬০°'],[90,'৯০°'],[120,'১২০°']],r:[1.5,3,6],j:[3.175,4,6],d:[3,5,6,8],c:[3.175,6,8]};
+let CFG=Object.assign({ctrl:'richauto',mat:'mdf',origin:'bl',prec:0.5,safe:5,ret:2,over:0.5,ext:'nc',cm:false,m3:true},store.get('cfg',{}));
+let TOOLS=store.get('tools',null)||JSON.parse(JSON.stringify(TBASE));
+function saveCfg(){store.set('cfg',CFG);store.set('tools',TOOLS);}
+function applyMat(m){CFG.mat=m;const f=MATS[m][1];for(const k in TBASE){const b=TBASE[k],t=TOOLS[k];t.feed=Math.round(b.feed*f/50)*50;t.plunge=Math.round(b.plunge*f/50)*50;t.pass=Math.max(1,Math.round(b.pass*f*2)/2);}saveCfg();}
+function setCtrl(c){CFG.ctrl=c;CFG.ext=CTRLS[c].ext;CFG.cm=CTRLS[c].cm;saveCfg();}
+function readCfg(){return {origin:CFG.origin,ext:CFG.ext,safe:Math.max(1,+CFG.safe||5),ret:Math.max(0.5,+CFG.ret||2),over:Math.max(0,+CFG.over||0),m3:CFG.m3!==false,cm:!!CFG.cm,prec:+CFG.prec||0.5};}
+
+/* ===================== DESIGN STATE ===================== */
+function scaleParams(p,sx,sy){const s=Math.min(sx,sy),q=Object.assign({},p),sb=clamp(s,0.6,1.6);
+ q.archH*=sy;q.bArchH*=sy;q.radius*=s;q.bInset*=sb;q.bGap*=clamp(s,0.75,1.4);q.bevStart*=sb;q.bevWidth*=sb;
+ if(q.motif==='vine'){q.mW*=sx;q.mH*=clamp(s,0.6,1.8);}else{q.mW*=s;q.mH*=s;}
+ q.cS*=s;q.jCell*=clamp(s,0.75,1.5);q.jMargin*=sb;q.hY*=sy;return q;}
+function applyDims(W,H,T){const q=scaleParams(BASE,W/BASE.W,H/BASE.H);q.W=W;q.H=H;q.T=T;if(q.part==='drawer')q.hY=H/2;P=q;DIMS[P.part]={W,H,T};store.set('dims',DIMS);saveLast();schedule();}
+function setPartFresh(fk,pk,over){P=Object.assign({},DEF,PARTS[pk].p,over||{},{furn:fk,part:pk});BASE=Object.assign({},P);const d=DIMS[pk];if(d)applyDims(d.W,d.H,d.T);else{saveLast();schedule();}}
+function setP(ch){Object.assign(P,ch);BASE=Object.assign({},P);saveLast();schedule();}
+let lastT=null;function saveLast(){clearTimeout(lastT);lastT=setTimeout(()=>store.set('last',P),500);}
+
+/* ===================== REALISTIC WOOD RENDER ===================== */
+function renderWood(D,gF,o={}){const {gw,gh,res,G}=D,N=gw*gh;const Sj=anyOf(D.jali)?signedDist(D.jali,gw,gh):null;
+ const re=clamp(D.T*0.1,1,3),z=new Float32Array(N),solid=new Uint8Array(N);let maxd=0.5;
+ for(let k=0;k<N;k++){if(D.shape[k]&&!D.jali[k]){solid[k]=1;let d=D.relief[k];if(gF&&gF[k]>d)d=gF[k];if(d>maxd)maxd=d;let e=D.S[k]*res;if(Sj){const ej=-Sj[k]*res;if(ej<e)e=ej;}let zz=-d;if(e<re){const t=1-Math.max(0,e)/re;zz-=t*t*re*0.9;}z[k]=zz;}else z[k]=-D.T*1.2;}
+ const zb=blurArr(z,gw,gh,Math.max(1,Math.round(3/res)));
+ const sm=new Float32Array(N);for(let k=0;k<N;k++)sm[k]=solid[k];const smb=blurArr(sm,gw,gh,Math.max(1,Math.round(Math.max(3,D.T*0.4)/res)));
+ const ox=Math.max(1,Math.round(D.T*0.3/res)),oy=Math.max(1,Math.round(D.T*0.42/res));
+ let i0=0,i1=gw-1,j0=0,j1=gh-1;if(o.crop){const [a,b,c,d]=o.crop;i0=clamp(Math.floor(G.I(a)),0,gw-1);i1=clamp(Math.ceil(G.I(c)),0,gw-1);j0=clamp(Math.floor(G.J(d)),0,gh-1);j1=clamp(Math.ceil(G.J(b)),0,gh-1);}
+ const w=i1-i0+1,h=j1-j0+1,im=new ImageData(w,h),px=im.data;const vert=D.H>=D.W;
+ const L1=[-0.48,0.55,0.68],L2=[0.55,-0.25,0.8],Hh=(()=>{const a=[L1[0],L1[1],L1[2]+1],l=Math.hypot(...a);return a.map(v=>v/l);})();
+ const dark=o.wood==='dark'?[110,62,32]:[156,98,52],light=o.wood==='dark'?[170,104,58]:[220,166,108];
+ for(let j=j0;j<=j1;j++)for(let i=i0;i<=i1;i++){const k=j*gw+i,p4=4*((j-j0)*w+(i-i0));
+  if(!solid[k]){const t=(j-j0)/h;let r=239-18*t,g=231-21*t,b=219-23*t;const si=i-ox,sj=j-oy;let sh=0;if(si>=0&&sj>=0)sh=smb[sj*gw+si];const f=1-0.42*sh;px[p4]=r*f;px[p4+1]=g*f;px[p4+2]=b*f;px[p4+3]=255;continue;}
+  const zc=z[k],gz=q=>solid[q]?z[q]:zc-0.6;
+  const zl=i>0?gz(k-1):zc,zr=i<gw-1?gz(k+1):zc,zu=j>0?gz(k-gw):zc,zd=j<gh-1?gz(k+gw):zc;
+  const ex=o.ex||1.4;let nx=clamp(-(zr-zl)/(2*res)*ex,-5,5),ny=clamp(-(zu-zd)/(2*res)*ex,-5,5);const nl=Math.sqrt(nx*nx+ny*ny+1);nx/=nl;ny/=nl;const nz=1/nl;
+  const d1=Math.max(0,nx*L1[0]+ny*L1[1]+nz*L1[2]),d2=Math.max(0,nx*L2[0]+ny*L2[1]+nz*L2[2]),sp=Math.pow(Math.max(0,nx*Hh[0]+ny*Hh[1]+nz*Hh[2]),36)*0.22;
+  const ao=clamp(1-Math.max(0,zb[k]-zc)*0.28,0.45,1);
+  const x=G.X(i),y=G.Y(j),a=vert?y:x,b=vert?x:y;
+  const w1=Math.sin((b+3*Math.sin(a*0.008)+1.5*Math.sin(a*0.021+b*0.011))*0.9),w2=Math.sin(b*3.1+Math.sin(a*0.07)*3)*0.5+Math.sin(b*7.3+a*0.01)*0.25;
+  let t=0.55+0.11*w1+0.05*w2;if(-zc>0.4)t+=0.05;
+  const L=(0.2+0.88*d1+0.16*d2)*ao*(1-0.28*Math.min(1,-zc/maxd));
+  for(let c=0;c<3;c++)px[p4+c]=clamp((dark[c]+(light[c]-dark[c])*t)*L+sp*255,0,255);px[p4+3]=255;}
+ return imToCanvas(im);}
+function blurArr(a,w,h,r){if(r<1)return a;let src=a;for(let pass=0;pass<2;pass++){const t=new Float32Array(w*h),o=new Float32Array(w*h),n=2*r+1;
+ for(let y=0;y<h;y++){const of=y*w;let s=0;for(let x=-r;x<=r;x++)s+=src[of+clamp(x,0,w-1)];for(let x=0;x<w;x++){t[of+x]=s/n;s+=src[of+Math.min(w-1,x+r+1)]-src[of+Math.max(0,x-r)];}}
+ for(let x=0;x<w;x++){let s=0;for(let y=-r;y<=r;y++)s+=t[clamp(y,0,h-1)*w+x];for(let y=0;y<h;y++){o[y*w+x]=s/n;s+=t[Math.min(h-1,y+r+1)*w+x]-t[Math.max(0,y-r)*w+x];}}
+ src=o;}return src;}
+
+/* ---------- thumbnails ---------- */
+const PLAIN={borders:0,bevel:false,motif:'none',corner:'none',jali:'none',handles:0,radius:0,top:'flat',bottom:'flat'};
+const THC=new Map();
+function thumbPart(params,size,crop){const p=Object.assign({},DEF,params);const span=crop?Math.max(crop[2]-crop[0],crop[3]-crop[1]):Math.max(p.W,p.H);const res=Math.max(0.35,span/size);
+ const D=buildPart(p,res,crop?4:Math.max(p.W,p.H)*0.05);return renderWood(D,grooveField(D,90),{crop});}
+let THGEN=0;
+function queueThumb(el,key,fn){const holder=el.querySelector('.th');if(THC.has(key)){holder.innerHTML='';holder.appendChild(THC.get(key));return;}
+ holder.innerHTML='<span class="ld">⏳</span>';const gen=THGEN;TQ.push(()=>{if(gen!==THGEN)return;let c=null;try{c=fn();}catch(e){console.error(e);}if(!c){holder.innerHTML='<span style="font-size:34px">🖼️</span>';return;}THC.set(key,c);holder.innerHTML='';holder.appendChild(c);});runTQ();}
+const TQ=[];let tqRun=false;function runTQ(){if(tqRun)return;tqRun=true;const step=()=>{const f=TQ.shift();if(!f){tqRun=false;return;}f();setTimeout(step,0);};setTimeout(step,0);}
+function optCard(label,sub,on,big){const b=document.createElement('button');b.type='button';b.className='opt'+(on?' on':'')+(big?' big':'');b.innerHTML=`<div class="th"></div><span class="chk">✓</span><b>${esc(label)}</b>${sub?`<small>${esc(sub)}</small>`:''}`;b.querySelector('.chk').style.position='absolute';b.style.position='relative';return b;}
+
+/* ===================== PREVIEW ===================== */
+let LASTPV=null,VIEW='shade',pvT=null,PVON=false;
+function previewRes(target){const W=MODE==='image'?Q.W:P.W,H=MODE==='image'?Q.H:P.H;return Math.max(0.3,Math.max(W,H)/(target||(window.innerWidth<700?520:700)));}
+function schedule(){if(!PVON)return;$('pvBusy').textContent='⏳';clearTimeout(pvT);pvT=setTimeout(renderPreview,140);}
+function buildCur(res,margin){margin=margin??autoMargin();return MODE==='image'?buildImage(Q,res,margin):buildPart(P,res,margin);}
+function autoMargin(){const W=MODE==='image'?Q.W:P.W,H=MODE==='image'?Q.H:P.H;return Math.max(TOOLS.c.dia+8,Math.max(W,H)*0.07);}
+function makePV(res){const D=buildCur(res);const geo=tpGeom(D,TOOLS);const gF=grooveField(D,TOOLS.g.vang);return {D,geo,gF,wood:null};}
+function renderPreview(){$('pvBusy').textContent='';if(MODE==='image'&&!IIMG){LASTPV=null;drawPlaceholder($('pv'));return;}
+ try{LASTPV=makePV(previewRes());}catch(e){console.error(e);return;}
+ const b=$('pvBox');drawInto($('pv'),LASTPV,b.clientWidth-4,b.clientHeight-4,VIEW);
+ $('pvDim').textContent=fmtU(LASTPV.D.W)+' × '+fmtU(LASTPV.D.H);
+ const W=warnings(LASTPV.D,LASTPV.geo).filter(x=>x[0]==='warn');const wl=$('warnLine');wl.classList.toggle('hidden',!W.length);if(W.length)wl.textContent='⚠️ '+W[0][1]+(W.length>1?' (+'+bn(W.length-1)+')':'');
+ if(ROUTE.st&&FLOWS[ROUTE.s]&&FLOWS[ROUTE.s].steps[ROUTE.st-1].r===stMake)renderMakeInfo();}
+function drawPlaceholder(cv){cv.width=600;cv.height=300;cv.style.width='300px';cv.style.height='150px';const x=cv.getContext('2d');x.fillStyle='#7b6655';x.font='28px Hind Siliguri,sans-serif';x.textAlign='center';x.fillText('ছবি দিলে এখানে দেখাবে',300,160);$('pvDim').textContent='';}
+function drawInto(cv,pv,maxW,maxH,view){const D=pv.D,tw=D.W+2*D.M,th=D.H+2*D.M,sc=Math.max(0.01,Math.min(maxW/tw,maxH/th)),dpr=Math.min(2,window.devicePixelRatio||1);
+ cv.width=Math.max(10,Math.round(tw*sc*dpr));cv.height=Math.max(10,Math.round(th*sc*dpr));cv.style.width=Math.round(tw*sc)+'px';cv.style.height=Math.round(th*sc)+'px';
+ const ctx=cv.getContext('2d'),k=sc*dpr,X=x=>(x+D.M)*k,Y=y=>(D.H+D.M-y)*k;
+ cv.classList.toggle('tilt',view==='tilt');cv.parentElement.classList.toggle('paper',view==='draw'||view==='path');if(cv.id==='pv')$('pvLegend').classList.toggle('hidden',view!=='path');
+ if(view==='draw'){drawDrawing(ctx,D,pv.geo,k,X,Y,dpr);return;}
+ if(!pv.wood)pv.wood=renderWood(D,pv.gF);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ if(view!=='path'){ctx.drawImage(pv.wood,0,0,cv.width,cv.height);return;}
+ ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.globalAlpha=0.3;ctx.drawImage(pv.wood,0,0,cv.width,cv.height);ctx.globalAlpha=1;
+ const rm=document.createElement('canvas');rm.width=D.gw;rm.height=D.gh;const rx=rm.getContext('2d'),ri=rx.createImageData(D.gw,D.gh);
+ for(let q=0;q<D.relief.length;q++)if(D.relief[q]>0.05){ri.data[4*q]=240;ri.data[4*q+1]=140;ri.data[4*q+2]=20;ri.data[4*q+3]=90;}
+ rx.putImageData(ri,0,0);ctx.drawImage(rm,0,0,cv.width,cv.height);
+ const path=(p,col,w,dash)=>{ctx.beginPath();p.forEach((q,i)=>i?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])));ctx.closePath();ctx.strokeStyle=col;ctx.lineWidth=w*dpr;ctx.setLineDash(dash?dash.map(v=>v*dpr):[]);ctx.stroke();};
+ D.grooves.forEach(g=>path(g.pts,'#1d4fa3',1.3));pv.geo.jaliLoops.forEach(p=>path(p,'#1f8a4c',1.3));pv.geo.cut.forEach(p=>path(p,'#d0281c',1.7,[6,4]));
+ if(D.cut.on&&D.cut.tabs>0)pv.geo.cut.forEach(L=>{const cl=[...L,L[0]],per=perim(cl,false);for(let t=0;t<D.cut.tabs;t++){const pt=pointAt(cl,per*(t+0.5)/D.cut.tabs);ctx.fillStyle='#f0a020';ctx.fillRect(X(pt[0])-4*dpr,Y(pt[1])-4*dpr,8*dpr,8*dpr);}});
+ ctx.setLineDash([]);D.drills.forEach(h=>{ctx.beginPath();ctx.arc(X(h.x),Y(h.y),Math.max(3*dpr,h.d/2*k),0,7);ctx.strokeStyle='#7a2ea0';ctx.lineWidth=2*dpr;ctx.stroke();});}
+function openViewer(){if(!LASTPV)return;$('viewer').classList.remove('hidden');VV=VIEW;markSeg('vSeg',VV);setTimeout(()=>{try{VPV=makePV(previewRes(1300));}catch(e){VPV=LASTPV;}drawViewer();},30);}
+let VV='shade',VPV=null;
+function drawViewer(){const c=$('vc');drawInto($('vcv'),VPV||LASTPV,c.clientWidth-8,c.clientHeight-8,VV);}
+function markSeg(id,v){$(id).querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));}
+
+/* ===================== WARNINGS ===================== */
+function warnings(D,geo){const L=[],add=(c,t)=>L.push([c,t]);const maxR=maxOf(D.relief);
+ if(MODE==='image'){if(IIMG){if(/jpe?g/i.test(IIMG.type)&&Q.mode!=='relief')add('tip','JPG-তে কিনারা ঝাপসা হয়। PNG দিলে বা “মসৃণ” ১–২ করলে ভালো হবে।');
+   if(Math.max(IIMG.ow,IIMG.oh)<800)add('warn','ছবিটা ছোট ('+IIMG.ow+'×'+IIMG.oh+')। বড় মাপে খাঁজ খাঁজ দেখাবে, ১৫০০+ পিক্সেলের ছবি দিন।');
+   if(Q.mode==='relief'&&IIMG.mid>0.55&&IIMG.colorful>0.08)add('warn','সাধারণ ফটো থেকে ভালো রিলিফ হয় না। ডেপথ-ম্যাপ (সাদা=উঁচু, কালো=নিচু) ছবি দিন।');
+   if(Q.mode!=='relief'&&IIMG.mid>0.35)add('tip','ছবিতে ধূসর অংশ বেশি। “সাদা-কালো সীমা” স্লাইডার ঠিক করুন।');}}
+ else{if((P.motif==='image'||P.corner==='image')&&!DIMG)add('warn','“নিজের ছবি” বাছাই করা, কিন্তু ছবি দেওয়া হয়নি।');
+  if(!D.inner&&(P.motif!=='none'||P.corner!=='none'))add('warn','নকশা বসানোর জায়গা নেই। বর্ডার কমান বা মাপ বাড়ান।');
+  if(P.jali!=='none'&&P.jali!=='full'){const hole=JALI_HOLE[P.jali]*P.jCell;if(hole<TOOLS.j.dia*1.25)add('warn','জালির ছিদ্র (~'+Math.round(hole)+' মিমি) বিটের ('+TOOLS.j.dia+' মিমি) তুলনায় ছোট। ঘর বড় করুন বা ছোট বিট নিন।');
+   const bar=P.jCell*(1-Math.min(0.75,JALI_HOLE[P.jali]));if(bar<5)add('warn','জালির মাঝের কাঠ খুব সরু (~'+bar.toFixed(1)+' মিমি), ভাঙতে পারে।');}
+  if(P.jali!=='none'&&geo.jaliLoops.length===0)add('warn','এই বিট দিয়ে জালির কোনো অংশ কাটা যাবে না।');
+  if(P.handles>0&&(P.hY>P.H||P.hY<0))add('warn','হ্যান্ডেলের ছিদ্র বোর্ডের বাইরে চলে গেছে।');}
+ if(maxR>D.T-3)add('warn','খোদাইয়ের গভীরতা ('+maxR.toFixed(1)+' মিমি) বোর্ডের পুরুত্বের খুব কাছে।');
+ if(maxR>0.05&&TOOLS.r.step>TOOLS.r.dia*0.25)add('tip','রিলিফের স্টেপওভার বেশি, ফিনিশ খসখসে হবে। বিটের ব্যাসের ১০–২০% রাখুন।');
+ if(D.cut.on){if(TOOLS.c.pass>TOOLS.c.dia)add('warn','কাটিংয়ে প্রতি পাসের গভীরতা বিটের ব্যাসের চেয়ে বেশি।');if((D.cut.tabs|0)===0)add('tip','ট্যাব নেই, তাই শেষ পাসে টুকরো নড়ে যেতে পারে।');}
+ return L;}
+
+/* ===================== ROUTER ===================== */
+let ROUTE={s:'home',st:1},NAVN=0;
+const FLOWS={
+ ready:{t:'রেডি নকশা',steps:[{t:'ফার্নিচার বাছুন',r:stFurn,pv:0},{t:'নকশা বাছুন',r:stGallery,pv:0},{t:'আপনার মাপ দিন',r:stSize,pv:1},{t:'মেশিনের ফাইল',r:stMake,pv:1}]},
+ custom:{t:'নিজে ডিজাইন',steps:[{t:'ফার্নিচার ও অংশ',r:stPart,pv:1},{t:'মাপ',r:stSize,pv:1},{t:'বেস আকৃতি',r:stShape,pv:1},{t:'বর্ডার',r:stBorder,pv:1},{t:'মাঝের নকশা',r:stMotif,pv:1},{t:'নকশার স্টাইল ও মাপ',r:stMotifSet,pv:1},{t:'কোণার নকশা',r:stCorner,pv:1},{t:'জালি',r:stJali,pv:1},{t:'ছিদ্র ও কাটিং',r:stCut,pv:1},{t:'মেশিনের ফাইল',r:stMake,pv:1}]},
+ image:{t:'ছবি থেকে',steps:[{t:'ছবি দিন',r:stImgUp,pv:0},{t:'কাজের ধরন',r:stImgMode,pv:1},{t:'মাপ ও ঠিকঠাক',r:stImgSize,pv:1},{t:'মেশিনের ফাইল',r:stMake,pv:1}]}
+};
+const SCREENS={home:{t:'নকশা CNC',sub:'ফার্নিচারের নকশা থেকে CNC ফাইল',r:scHome},cut:{t:'মাপ হিসাব',sub:'কাটিং লিস্ট',r:scCut},help:{t:'সাহায্য',sub:'কীভাবে ব্যবহার করবেন',r:scHelp},machine:{t:'মেশিন ও বিট',sub:'একবার সেট করলে মনে থাকবে',r:scMachine}};
+function nav(s,st=1,replace){ROUTE={s,st};const h='#'+(FLOWS[s]?s+'-'+st:s);try{if(replace)history.replaceState(null,'',h);else{history.pushState(null,'',h);NAVN++;}}catch(e){}render();}
+function parseHash(){const h=(location.hash||'#home').slice(1),m=/^(ready|custom|image)-(\d+)$/.exec(h);
+ if(m){const n=FLOWS[m[1]].steps.length;ROUTE={s:m[1],st:clamp(+m[2],1,n)};}else if(SCREENS[h])ROUTE={s:h,st:1};else ROUTE={s:'home',st:1};}
+window.addEventListener('popstate',()=>{NAVN=Math.max(0,NAVN-1);parseHash();render();});
+function goBack(){if(NAVN>0)history.back();else{const f=FLOWS[ROUTE.s];if(f&&ROUTE.st>1)nav(ROUTE.s,ROUTE.st-1,true);else nav('home',1,true);}}
+function render(){THGEN++;TQ.length=0;window.scrollTo({top:0});const main=$('main');main.innerHTML='';
+ const f=FLOWS[ROUTE.s];$('backB').style.visibility=ROUTE.s==='home'?'hidden':'visible';$('unitB').textContent=UNAME[UNIT];
+ if(f){MODE=ROUTE.s==='image'?'image':'design';const st=f.steps[ROUTE.st-1],n=f.steps.length;
+  $('ttl').textContent=f.t;$('sub').textContent='ধাপ '+bn(ROUTE.st)+'/'+bn(n)+' · '+st.t;$('prog').classList.remove('hidden');$('progI').style.width=(ROUTE.st/n*100)+'%';
+  PVON=!!st.pv;$('pvPane').classList.toggle('hidden',!PVON);$('act').classList.remove('hidden');
+  $('prevB').style.display=ROUTE.st>1?'':'none';$('nextB').style.display=ROUTE.st<n?'':'none';$('nextB').textContent='পরের ধাপ →';
+  st.r(main);if(PVON){renderPreview();}}
+ else{const sc=SCREENS[ROUTE.s];$('ttl').textContent=sc.t;$('sub').textContent=sc.sub;$('prog').classList.add('hidden');PVON=false;$('pvPane').classList.add('hidden');$('act').classList.add('hidden');sc.r(main);}}
+function canNext(){const f=ROUTE.s,st=ROUTE.st;if(f==='image'&&st===1&&!IIMG){toast('আগে একটা ছবি দিন');return false;}if(f==='ready'&&st===2&&!RS.picked){toast('একটা নকশা বাছাই করুন');return false;}
+ if(f==='ready'&&st===1&&!RS.furn){toast('ফার্নিচার বাছাই করুন');return false;}return true;}
+
+/* ===================== HELPERS FOR STEP UI ===================== */
+function H(html){const d=document.createElement('div');d.innerHTML=html;return d;}
+function head(main,title,lead){main.appendChild(H(`<h2>${title}</h2>${lead?`<p class="lead">${lead}</p>`:''}`));}
+function grid(main,cls){const g=document.createElement('div');g.className=cls||'grid3';main.appendChild(g);return g;}
+function chipRow(main,items,isOn,onPick,label){const w=document.createElement('div');if(label)w.appendChild(H(`<h3>${label}</h3>`));const r=document.createElement('div');r.className='chips';
+ items.forEach(([v,t,cls])=>{const b=document.createElement('button');b.className='chip'+(cls?' '+cls:'')+(isOn(v)?' on':'');b.textContent=t;b.onclick=()=>{onPick(v);r.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));if(isOn(v))b.classList.add('on');};r.appendChild(b);});w.appendChild(r);main.appendChild(w);return r;}
+function rangeRow(parent,label,min,max,step,get,set,isDim,fmtF){const w=document.createElement('label');w.className='rng';const v=document.createElement('span');
+ const show=()=>{const x=get();v.textContent=fmtF?fmtF(x):(isDim?fmtU(x):String(Math.round(x*10)/10));};
+ w.innerHTML=`<span>${label}: </span>`;w.firstChild.appendChild(v);v.className='v';const inp=document.createElement('input');inp.type='range';inp.min=min;inp.max=max;inp.step=step;inp.value=get();
+ inp.oninput=()=>{set(parseFloat(inp.value));show();};w.appendChild(inp);parent.appendChild(w);show();return inp;}
+function numField(parent,label,get,set,isDim,cls){const w=document.createElement('label');w.className='fld'+(cls?' '+cls:'');w.innerHTML=`<span>${label}${isDim?' ('+UNAME[UNIT]+')':''}</span>`;
+ const inp=document.createElement('input');inp.type='number';inp.step='any';inp.inputMode='decimal';inp.value=isDim?uv(get()):get();
+ inp.oninput=()=>{const x=parseFloat(inp.value);if(!isFinite(x)||x<=0)return;set(isDim?x*UF[UNIT]:x);};w.appendChild(inp);parent.appendChild(w);return inp;}
+function togRow(parent,label,get,set){const w=document.createElement('label');w.className='tog';w.innerHTML=`<input type="checkbox" ${get()?'checked':''}><span>${label}</span>`;w.querySelector('input').onchange=e=>set(e.target.checked);parent.appendChild(w);}
+function more(parent,title){const d=document.createElement('details');d.className='more';d.innerHTML=`<summary>${title||'⚙️ আরও খুঁটিনাটি ঠিক করুন'}</summary>`;parent.appendChild(d);return d;}
+function pickGrid(main,list,key,thumbFn,keyFn,onPick,big){const g=grid(main,big?'grid2':'grid3');
+ list.forEach(([v,n,sub])=>{const b=optCard(n,sub,String(P[key])===String(v),big);b.onclick=()=>{g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');onPick?onPick(v):setP({[key]:v});};g.appendChild(b);queueThumb(b,keyFn(v),()=>thumbFn(v));});return g;}
+const FICON={
+ almirah:'<svg viewBox="0 0 80 80"><path d="M14 22h52v50H14z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="2"/><path d="M12 22c6-10 18-14 28-14s22 4 28 14z" fill="#d7a874" stroke="#5a3a1c" stroke-width="2"/><path d="M40 24v36M18 60h44" stroke="#5a3a1c" stroke-width="2"/><circle cx="36" cy="42" r="1.6" fill="#5a3a1c"/><circle cx="44" cy="42" r="1.6" fill="#5a3a1c"/><path d="M18 64h44v6H18z" fill="#c99560"/></svg>',
+ bed:'<svg viewBox="0 0 80 80"><path d="M10 20c0-6 6-10 15-10h30c9 0 15 4 15 10v26H10z" fill="#d7a874" stroke="#5a3a1c" stroke-width="2"/><path d="M8 46h64v14H8z" fill="#f3e2c4" stroke="#5a3a1c" stroke-width="2"/><path d="M10 60v10M70 60v10" stroke="#5a3a1c" stroke-width="3"/><circle cx="40" cy="26" r="7" fill="none" stroke="#5a3a1c" stroke-width="1.6"/></svg>',
+ dressing:'<svg viewBox="0 0 80 80"><ellipse cx="40" cy="26" rx="16" ry="19" fill="#cfe3ea" stroke="#5a3a1c" stroke-width="2"/><path d="M12 46h56v16H12z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="2"/><path d="M40 46v16M14 62v10M66 62v10" stroke="#5a3a1c" stroke-width="2"/></svg>',
+ showcase:'<svg viewBox="0 0 80 80"><path d="M14 10h52v62H14z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="2"/><path d="M18 14h20v34H18zM42 14h20v34H42z" fill="#d8ecf2" stroke="#5a3a1c" stroke-width="1.6"/><path d="M18 31h44M18 52h44v16H18z" fill="none" stroke="#5a3a1c" stroke-width="1.6"/></svg>',
+ table:'<svg viewBox="0 0 80 80"><path d="M6 30h68v8H6z" fill="#d7a874" stroke="#5a3a1c" stroke-width="2"/><path d="M12 38h56v8H12z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="1.6"/><path d="M14 46v24M66 46v24" stroke="#5a3a1c" stroke-width="4"/></svg>',
+ partition:'<svg viewBox="0 0 80 80"><path d="M22 72V22c0-10 8-14 18-14s18 4 18 14v50z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="2"/><g fill="#5a3a1c">'+[...Array(15)].map((_,i)=>`<circle cx="${30+(i%3)*10}" cy="${30+Math.floor(i/3)*9}" r="2.6"/>`).join('')+'</g></svg>',
+ custom:'<svg viewBox="0 0 80 80"><path d="M14 14h52v52H14z" fill="#e9c9a0" stroke="#5a3a1c" stroke-width="2" stroke-dasharray="5 3"/><path d="M28 54l4-12 20-20 8 8-20 20z" fill="#f3e2c4" stroke="#5a3a1c" stroke-width="2"/></svg>'};
+function furnGrid(main,cur,onPick){const g=grid(main,'grid3');Object.entries(FURN).forEach(([k,v])=>{const b=document.createElement('button');b.className='fur'+(cur===k?' on':'');b.innerHTML=FICON[k]+esc(v.n);b.onclick=()=>{g.querySelectorAll('.fur').forEach(x=>x.classList.remove('on'));b.classList.add('on');onPick(k);};g.appendChild(b);});return g;}
+function sampleParams(s){const p=Object.assign({},DEF,PARTS[s.pt].p,s.o);return p;}
+
+/* ===================== HOME ===================== */
+function scHome(main){
+ const hero=H(`<div class="home-hero"><div class="hh"></div><div><h1>নকশা CNC</h1><p>আলমারি, খাট, ড্রেসিং, দরজা — যেকোনো ফার্নিচারের নকশা বানান, আর সরাসরি CNC রাউটারের ফাইল (.nc/.tap) নিন।</p></div></div>`).firstChild;main.appendChild(hero);
+ const hh=hero.querySelector('.hh');setTimeout(()=>{try{const c=thumbPart(sampleParams(SAMPLES[0]),180);c.style.width='70px';hh.appendChild(c);}catch(e){}},30);
+ const last=store.get('last',null);
+ if(last&&last.part&&PARTS[last.part]){const r=H(`<button class="slim" style="width:100%;margin-bottom:12px">↩️ আগের ডিজাইন চালিয়ে যান <span class="mini">(${esc(PARTS[last.part].n)}, ${fmtU(last.W)} × ${fmtU(last.H)})</span></button>`).firstChild;r.onclick=()=>{P=Object.assign({},DEF,last);BASE=Object.assign({},P);nav('custom',3);};main.appendChild(r);}
+ const t=H(`<div class="tiles">
+  <button class="tile main" data-go="ready"><span class="em">⭐</span><b>রেডি নকশা</b><small>স্যাম্পল দেখে বাছুন, নিজের মাপ দিন, ফাইল নিন</small></button>
+  <button class="tile" data-go="custom"><span class="em">✏️</span><b>নিজে ডিজাইন</b><small>আকৃতি, বর্ডার, নকশা, জালি — ধাপে ধাপে নিজের মতো</small></button>
+  <button class="tile" data-go="image"><span class="em">🖼️</span><b>ছবি থেকে</b><small>নাম, লোগো, নকশার ছবি থেকে সরাসরি ফাইল</small></button>
+  <button class="tile" data-go="cut"><span class="em">📐</span><b>মাপ হিসাব</b><small>পুরো আলমারি/খাটের কাটিং লিস্ট ও বোর্ড</small></button></div>
+  <div class="row2"><button class="slim" data-go="machine">⚙️ মেশিন ও বিট<br><span class="mini">${esc(CTRLS[CFG.ctrl].n)} · ${esc(MATS[CFG.mat][0])}</span></button><button class="slim" data-go="help">❓ সাহায্য<br><span class="mini">কোনটা কখন ব্যবহার করবেন</span></button></div>`);
+ main.appendChild(t);t.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const g=b.dataset.go;if(g==='custom'&&!P.part)setPartFresh('almirah','door');nav(g,1);});}
+
+/* ===================== READY FLOW ===================== */
+const RS={furn:null,picked:false};
+function stFurn(main){head(main,'কোন ফার্নিচারের নকশা?','একটা বাছাই করুন। পরের ধাপে সেই ফার্নিচারের সব রেডি নকশা দেখাবে।');furnGrid(main,RS.furn,k=>{RS.furn=k;RS.picked=false;setTimeout(()=>nav('ready',2),180);});}
+function stGallery(main){if(!RS.furn)RS.furn='almirah';head(main,FURN[RS.furn].n+' — নকশা বাছুন','যেটা পছন্দ, চাপ দিন। পরের ধাপে আপনার মাপ দেবেন।');
+ chipRow(main,Object.entries(FURN).map(([k,v])=>[k,v.n]),k=>k===RS.furn,k=>{RS.furn=k;render();});
+ const g=grid(main,'grid2');g.style.marginTop='10px';
+ SAMPLES.map((s,i)=>[s,i]).filter(([s])=>s.f===RS.furn).forEach(([s,i])=>{const b=optCard(s.n,PARTS[s.pt].n,RS.picked===i,true);
+  b.onclick=()=>{RS.picked=i;setPartFresh(s.f,s.pt,s.o);g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');setTimeout(()=>nav('ready',3),220);};
+  g.appendChild(b);queueThumb(b,'s'+i,()=>thumbPart(sampleParams(s),440));});}
+
+/* ===================== SIZE ===================== */
+function stSize(main){head(main,'আপনার মাপ দিন',`${esc(PARTS[P.part].n)}-এর মাপ নিজে লিখুন। নিচের প্রচলিত মাপে চাপ দিলেও বসে যাবে। নকশাটা আপনার মাপ অনুযায়ী নিজে থেকে মিলে যাবে।`);
+ const g=grid(main,'grid2');let cur={W:P.W,H:P.H,T:P.T};
+ const upd=()=>{if(cur.W>=20&&cur.H>=20&&cur.T>=3)applyDims(cur.W,cur.H,cur.T);};
+ const iw=numField(g,'প্রস্থ (চওড়া)',()=>cur.W,v=>{cur.W=v;upd();},true,'bigin'),ih=numField(g,'উচ্চতা (লম্বা)',()=>cur.H,v=>{cur.H=v;upd();},true,'bigin');
+ const g2=grid(main,'grid2');g2.style.marginTop='8px';const it=numField(g2,'বোর্ডের পুরুত্ব',()=>cur.T,v=>{cur.T=v;upd();},true);
+ const sz=(SZ[P.part]||[]).map(([w,h])=>[w+'x'+h,fmtSz(w*25.4,h*25.4),'sug']);
+ chipRow(main,sz,v=>{const [w,h]=v.split('x').map(Number);return Math.abs(cur.W-w*25.4)<1&&Math.abs(cur.H-h*25.4)<1;},v=>{const [w,h]=v.split('x').map(Number);cur.W=w*25.4;cur.H=h*25.4;iw.value=uv(cur.W);ih.value=uv(cur.H);upd();},'💡 প্রচলিত মাপ (চাপলে বসবে)');
+ chipRow(main,THK.map(t=>[t,thkLabel(t),'sug']),t=>Math.abs(cur.T-t)<0.5,t=>{cur.T=t;it.value=uv(t);upd();},'💡 প্রচলিত পুরুত্ব');
+ const sw=H(`<div class="tip">মাপের একক বদলাতে উপরের “${UNAME[UNIT]}” বোতামে চাপ দিন (ইঞ্চি / মিমি / সেমি)। ফাইল সবসময় মিলিমিটারে তৈরি হয়, মেশিনে কোনো সমস্যা হবে না।</div>`);main.appendChild(sw);
+ if(ROUTE.s==='custom'){const b=H(`<p class="mini">পুরো আলমারি বা খাটের কোন অংশ কত মাপের হবে জানতে <a href="#" id="toCut">📐 মাপ হিসাব</a> দেখুন।</p>`);main.appendChild(b);b.querySelector('#toCut').onclick=e=>{e.preventDefault();nav('cut');};}}
+function fmtSz(wmm,hmm){return uv(wmm)+' × '+uv(hmm)+' '+UNAME[UNIT];}
+function thkLabel(t){return UNIT==='in'?({12:'½"',18:'¾"',25:'১"',30:'১¼"'}[t]+' ('+t+' মিমি)'):fmtU(t);}
+
+/* ===================== CUSTOM STEPS ===================== */
+function stPart(main){head(main,'কী বানাবেন?','প্রথমে ফার্নিচার, তারপর তার কোন অংশ (পার্ট) ডিজাইন করবেন সেটা বাছুন।');
+ let fk=P.furn||'almirah';const fg=furnGrid(main,fk,k=>{fk=k;drawParts();});
+ const h=H('<h3>কোন অংশ?</h3>');main.appendChild(h);const g=grid(main,'grid2');
+ const drawParts=()=>{THGEN++;TQ.length=0;g.innerHTML='';FURN[fk].parts.forEach(pk=>{const b=optCard(PARTS[pk].n,DIMS[pk]?'আপনার মাপ: '+fmtSz(DIMS[pk].W,DIMS[pk].H):'',P.part===pk&&P.furn===fk,true);
+  b.onclick=()=>{setPartFresh(fk,pk);g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');toast(PARTS[pk].n+' বাছাই হয়েছে। এবার “পরের ধাপ” চাপুন');};g.appendChild(b);
+  queueThumb(b,'p'+pk,()=>thumbPart(Object.assign({},DEF,PARTS[pk].p),400));});};drawParts();}
+function stShape(main){head(main,'বেস আকৃতি','বোর্ডটা কেটে কোন আকৃতিতে বের হবে, সেটা বাছুন। ছবিগুলো আপনার মাপের অনুপাতে দেখানো হয়েছে।');
+ main.appendChild(H('<h3>উপরের কিনারা</h3>'));const W=P.W,Hh=P.H,aH=v=>P.top===v&&P.archH>10?P.archH:Hh*0.22;
+ pickGrid(main,TOPS,'top',v=>thumbPart(Object.assign({},PLAIN,{W,H:Hh,top:v,archH:aH(v),waves:P.waves}),240),v=>'top'+v+W+'x'+Hh,v=>{setP({top:v,archH:aH(v)});render();});
+ const m=document.createElement('div');main.appendChild(m);
+ if(P.top!=='flat')rangeRow(m,'বাঁকের উচ্চতা',0,Math.round(Hh*0.6),1,()=>P.archH,v=>setP({archH:v}),true);
+ if(P.top==='wave')rangeRow(m,'ঢেউয়ের সংখ্যা',2,12,1,()=>P.waves,v=>setP({waves:v}),false);
+ main.appendChild(H('<h3>নিচের কিনারা</h3>'));const bH=v=>P.bottom===v&&P.bArchH>5?P.bArchH:Math.min(Hh*0.25,90);
+ pickGrid(main,BOTS,'bottom',v=>thumbPart(Object.assign({},PLAIN,{W,H:Math.min(Hh,W*0.7),bottom:v,bArchH:Math.min(Hh,W*0.7)*0.25}),240),v=>'bot'+v+W,v=>{setP({bottom:v,bArchH:bH(v)});render();});
+ const m2=document.createElement('div');main.appendChild(m2);if(P.bottom!=='flat')rangeRow(m2,'নিচের কাটার উচ্চতা',0,Math.round(Hh*0.5),1,()=>P.bArchH,v=>setP({bArchH:v}),true);
+ rangeRow(m2,'কোণা গোল করা',0,Math.round(Math.min(W,Hh)/4),1,()=>P.radius,v=>setP({radius:v}),true,x=>x<1?'নেই':fmtU(x));}
+function stBorder(main){head(main,'বর্ডার ও ফ্রেম','কিনারা থেকে একটু ভেতরে খোদাই করা রেখা বা ঢালু রেইজড প্যানেল। ছবিগুলো এক কোণার কাছ থেকে তোলা ছবির মতো দেখানো।');
+ const isOn=i=>{const o=BORDERS[i].o;return o.borders===P.borders&&o.bevel===P.bevel;};
+ const g=grid(main,'grid3');BORDERS.forEach((B,i)=>{const b=optCard(B.n,null,isOn(i));b.onclick=()=>{g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');setP(B.o);};g.appendChild(b);
+  queueThumb(b,'bd'+i,()=>thumbPart(Object.assign({},PLAIN,{W:420,H:420,bInset:30,bGap:12,bDepth:3,bevStart:55,bevWidth:32,bevDepth:5},B.o),240,[0,170,250,420]));});
+ const d=more(main);const gg=grid(d,'grid2');
+ rangeRow(d,'কিনারা থেকে লাইনের দূরত্ব',5,Math.round(Math.min(P.W,P.H)/4),1,()=>P.bInset,v=>setP({bInset:v}),true);
+ rangeRow(d,'দুই লাইনের মাঝে ফাঁক',4,60,1,()=>P.bGap,v=>setP({bGap:v}),true);
+ rangeRow(d,'লাইনের গভীরতা',0.5,8,0.5,()=>P.bDepth,v=>setP({bDepth:v}),false,x=>x+' মিমি');
+ rangeRow(d,'রেইজড প্যানেলের চওড়া',10,90,1,()=>P.bevWidth,v=>setP({bevWidth:v}),true);
+ rangeRow(d,'রেইজড প্যানেলের গভীরতা',1,12,0.5,()=>P.bevDepth,v=>setP({bevDepth:v}),false,x=>x+' মিমি');}
+function motifThumb(v,style){if(v==='none')return thumbPart(Object.assign({},PLAIN,{W:320,H:320}),240);if(v==='image'){if(!DIMG)return null;return thumbPart(Object.assign({},PLAIN,{W:320,H:320,motif:'image',mW:300,mH:300*DIMG.h/DIMG.w,mN:1,mPos:0,mDepth:5,mStyle:style,imgInv:P.imgInv,imgBin:P.imgBin,imgThr:P.imgThr,imgGamma:P.imgGamma}),240);}
+ const isV=v==='vine';return thumbPart(Object.assign({},PLAIN,{W:isV?380:320,H:isV?170:320,motif:v,mW:isV?370:305,mH:isV?150:305,mN:1,mPos:0,mDepth:5,mStyle:style}),240);}
+function stMotif(main){head(main,'মাঝের নকশা','বোর্ডের মাঝখানে কোন নকশা খোদাই হবে? চাপ দিলে উপরে পুরো ফার্নিচারে বসে যাবে। নিজের কোনো নকশা থাকলে “নিজের ছবি” বাছাই করুন।');
+ pickGrid(main,MOTIFS,'motif',v=>motifThumb(v,P.mStyle),v=>'mo'+v+P.mStyle+(v==='image'&&DIMG?DIMG.name:''),v=>{if(v==='image'&&!DIMG){pickImage(img=>{DIMG=img;THC.clear();setP({motif:'image',mH:P.mW*img.h/img.w});render();});return;}
+  const ch={motif:v};if(v==='vine'&&P.mH>P.mW*0.6){ch.mW=Math.min(P.W*0.75,P.mW*2.2);ch.mH=ch.mW*0.25;}else if(v!=='vine'&&P.motif==='vine'){ch.mW=ch.mH=Math.min(P.W*0.6,P.H*0.3);}setP(ch);});
+ if(P.motif==='image'||P.corner==='image')imgControls(main);}
+function imgControls(main){const b=H(`<div class="box"><h3 style="margin-top:0">আপনার ছবি</h3><div class="ip"></div></div>`).firstChild;main.appendChild(b);const ip=b.querySelector('.ip');
+ if(DIMG)ip.appendChild(H(`<img src="${DIMG.url}" style="max-width:100%;max-height:140px;border-radius:8px"><div class="mini">${esc(DIMG.name)} · ${DIMG.ow}×${DIMG.oh}</div>`));
+ const ch=document.createElement('button');ch.className='btn sec';ch.style.margin='8px 0';ch.textContent=DIMG?'ছবি বদলান':'ছবি দিন';ch.onclick=()=>pickImage(img=>{DIMG=img;THC.clear();if(P.motif==='image')setP({mH:P.mW*img.h/img.w});render();});ip.appendChild(ch);
+ togRow(ip,'উল্টো (সাদা অংশ খোদাই হবে)',()=>P.imgInv,v=>{setP({imgInv:v});});togRow(ip,'শুধু সাদা-কালো (সমান গভীরতা)',()=>P.imgBin,v=>setP({imgBin:v}));
+ rangeRow(ip,'সাদা-কালো সীমা',5,95,1,()=>P.imgThr,v=>setP({imgThr:v}),false,x=>Math.round(x)+'%');rangeRow(ip,'কনট্রাস্ট',0.3,3,0.1,()=>P.imgGamma,v=>setP({imgGamma:v}),false);}
+function stMotifSet(main){if(P.motif==='none'){head(main,'নকশার স্টাইল','আগের ধাপে কোনো নকশা বাছাই করা হয়নি। চাইলে “← আগের” চেপে নকশা বাছুন, নইলে পরের ধাপে যান।');styleGrid(main);return;}
+ head(main,'স্টাইল, সংখ্যা ও মাপ','নকশাটা কীভাবে কাটা হবে, কয়টা বসবে আর কত বড় হবে, ঠিক করুন।');styleGrid(main);
+ chipRow(main,[[1,'১টা'],[2,'২টা'],[3,'৩টা'],[4,'৪টা']],n=>(P.mN|0)===n,n=>{const ch={mN:n};const inner=LASTPV&&LASTPV.D.inner;if(inner&&n>1){const ih=inner[3]-inner[1];if(P.mH>ih/n*0.95){const f=ih/n*0.85/P.mH;ch.mH=P.mH*f;ch.mW=P.mW*f;}}setP(ch);render();},'কয়টা নকশা (উপর থেকে নিচে)');
+ const inner=LASTPV&&LASTPV.D.inner,iw=inner?inner[2]-inner[0]:P.W*0.8,ih=inner?inner[3]-inner[1]:P.H*0.8;
+ const box=document.createElement('div');main.appendChild(box);box.appendChild(H('<h3>নকশার মাপ</h3>'));
+ const asp=P.motif==='image'&&DIMG?DIMG.h/DIMG.w:(P.motif==='vine'?null:1);
+ rangeRow(box,'চওড়া',30,Math.round(iw),1,()=>P.mW,v=>setP(asp?{mW:v,mH:v*asp}:{mW:v}),true);
+ if(!asp)rangeRow(box,'উচ্চতা',20,Math.round(Math.min(ih,P.mW)),1,()=>P.mH,v=>setP({mH:v}),true);
+ if((P.mN|0)===1)rangeRow(box,'উপর-নিচ অবস্থান',-100,100,1,()=>P.mPos,v=>setP({mPos:v}),false,x=>x===0?'মাঝখানে':(x>0?'উপরে ':'নিচে ')+Math.abs(Math.round(x))+'%');
+ rangeRow(box,'খোদাইয়ের গভীরতা',1,Math.max(2,Math.min(15,P.T-4)),0.5,()=>P.mDepth,v=>setP({mDepth:v}),false,x=>x+' মিমি');}
+function styleGrid(main){main.appendChild(H('<h3>কীভাবে কাটা হবে (স্টাইল)</h3>'));const mv=P.motif==='none'?'rosette':P.motif;
+ pickGrid(main,STYLES,'mStyle',v=>motifThumb(mv,v),v=>'st'+mv+v+(mv==='image'&&DIMG?DIMG.name:''),v=>{setP({mStyle:v});});}
+function stCorner(main){head(main,'কোণার নকশা','ভেতরের ফ্রেমের চার কোণায় একই নকশা আয়নার মতো উল্টে বসবে। স্টাইল মাঝের নকশার মতোই হবে।');
+ pickGrid(main,CORNERS,'corner',v=>{if(v==='image'&&!DIMG)return null;const p=Object.assign({},PLAIN,{W:380,H:380,corner:v,cS:170,cDepth:5,mStyle:P.mStyle,imgInv:P.imgInv,imgBin:P.imgBin,imgThr:P.imgThr,imgGamma:P.imgGamma});return thumbPart(p,240,v==='none'?null:[0,150,230,380]);},v=>'co'+v+P.mStyle,v=>{if(v==='image'&&!DIMG){pickImage(img=>{DIMG=img;THC.clear();setP({corner:'image'});render();});return;}setP({corner:v});});
+ if(P.corner!=='none'){const inner=LASTPV&&LASTPV.D.inner;const mx=inner?Math.min(inner[2]-inner[0],inner[3]-inner[1])/2.2:200;
+  rangeRow(main,'কোণার নকশার মাপ',30,Math.round(mx),1,()=>P.cS,v=>setP({cS:v}),true);rangeRow(main,'গভীরতা',1,10,0.5,()=>P.cDepth,v=>setP({cDepth:v}),false,x=>x+' মিমি');}
+ if(P.corner==='image')imgControls(main);}
+function stJali(main){head(main,'জালি (এপার-ওপার কাটা)','জালি পুরো বোর্ড ভেদ করে কাটা হয়। ছোট জালির জন্য ৩ মিমি ফ্ল্যাট বিট লাগবে।');
+ pickGrid(main,JALIS,'jali',v=>thumbPart(Object.assign({},PLAIN,{W:300,H:300,jali:v,jCell:62,jMargin:22,jAvoid:false,borders:1,bInset:10,bDepth:2}),240),v=>'ja'+v,v=>{const ch={jali:v};if(v!=='none'&&P.jali==='none'&&P.jMargin<20)ch.jMargin=40;setP(ch);render();});
+ if(P.jali!=='none'){if(P.jali!=='full')rangeRow(main,'ঘরের মাপ (যত বড়, তত বড় ছিদ্র)',20,200,1,()=>P.jCell,v=>setP({jCell:v}),true);
+  rangeRow(main,'কিনারা থেকে ফাঁকা জায়গা',10,Math.round(Math.min(P.W,P.H)/3),1,()=>P.jMargin,v=>setP({jMargin:v}),true);
+  togRow(main,'নকশার জায়গায় জালি কাটবে না',()=>P.jAvoid,v=>setP({jAvoid:v}));}}
+function stCut(main){head(main,'ছিদ্র ও কেটে আলাদা করা','হ্যান্ডেলের স্ক্রু-ছিদ্র দেবেন কিনা ঠিক করুন। শেষে বোর্ডটা আকৃতি অনুযায়ী কেটে আলাদা হবে।');
+ chipRow(main,[[0,'নেই'],[1,'১টা (মাঝে)'],[2,'২টা (জোড়া)']],n=>(P.handles|0)===n,n=>{setP({handles:n,hY:P.hY>0&&P.hY<P.H?P.hY:P.H/2});render();},'হ্যান্ডেল ছিদ্র');
+ if(P.handles>0){if(P.handles===2)chipRow(main,[[64,'৬৪ মিমি'],[96,'৯৬ মিমি'],[128,'১২৮ মিমি'],[160,'১৬০ মিমি']],v=>Math.abs(P.hSpace-v)<0.5,v=>setP({hSpace:v}),'দুই ছিদ্রের দূরত্ব (হ্যান্ডেলের মাপ)');
+  rangeRow(main,'নিচ থেকে উচ্চতা',10,Math.round(P.H-10),1,()=>P.hY,v=>setP({hY:v}),true);
+  chipRow(main,[[4,'৪ মিমি'],[5,'৫ মিমি'],[6,'৬ মিমি'],[8,'৮ মিমি']],v=>P.hDia===v,v=>setP({hDia:v}),'ছিদ্রের ব্যাস');}
+ main.appendChild(H('<h3>কেটে আলাদা করা</h3>'));togRow(main,'নকশা শেষে বোর্ডটা আকৃতি অনুযায়ী কেটে আলাদা করো',()=>P.cutOn,v=>{setP({cutOn:v});render();});
+ if(P.cutOn){chipRow(main,[[0,'নেই'],[2,'২টা'],[4,'৪টা'],[6,'৬টা'],[8,'৮টা']],n=>(P.tabs|0)===n,n=>setP({tabs:n}),'ট্যাব (কাটার সময় টুকরো ধরে রাখে)');
+  main.appendChild(H('<p class="mini">ট্যাব মানে কাটার লাইনে রেখে দেওয়া ছোট কাঠের সেতু, যাতে টুকরো শেষ পাসে না নড়ে। কাজ শেষে হাতে কেটে শিরিষ করে নেবেন।</p>'));}}
+
+/* ===================== IMAGE FLOW ===================== */
+function pickImage(cb){const f=$('fileIn');f.value='';f.onchange=async()=>{const file=f.files[0];if(!file)return;try{const img=await loadImg(file);cb(img);}catch(e){toast('ছবিটা খোলা যায়নি');}};f.click();}
+function stImgUp(main){head(main,'ছবি দিন','নাম, লোগো, লেখা বা কোনো নকশার ছবি দিন। সবচেয়ে ভালো ফল হয় সাদা ব্যাকগ্রাউন্ডে কালো নকশার PNG ছবিতে।');
+ const d=H(`<div class="drop">📁 এখানে চাপ দিয়ে ছবি বাছুন<br><span class="mini">PNG / JPG / WEBP</span>${IIMG?`<img src="${IIMG.url}"><div class="mini">${esc(IIMG.name)} · ${IIMG.ow}×${IIMG.oh} পিক্সেল</div>`:''}</div>`).firstChild;main.appendChild(d);
+ d.onclick=()=>pickImage(img=>{IIMG=img;if(Q.lock)Q.H=Q.W*img.h/img.w;THC.clear();render();toast('ছবি নেওয়া হয়েছে, এবার “পরের ধাপ” চাপুন');});
+ main.appendChild(H(`<div class="box" style="margin-top:12px"><b>কেমন ছবি দেবেন?</b><ul style="margin:6px 0 0;padding-left:20px;font-size:14px"><li>✅ সাদা ব্যাকগ্রাউন্ডে কালো নকশা বা লেখা (PNG)</li><li>✅ 3D রিলিফের জন্য গ্রেস্কেল “ডেপথ ম্যাপ” (সাদা = উঁচু, কালো = নিচু)</li><li>✅ অন্তত ১৫০০ পিক্সেল চওড়া</li><li>❌ মানুষ বা প্রকৃতির রঙিন ফটো থেকে ভালো খোদাই হয় না</li></ul></div>`));}
+function stImgMode(main){head(main,'কী ধরনের কাজ?','আপনার ছবিটাই চারভাবে কেটে দেখানো হলো। যেটা চান, বাছুন।');const g=grid(main,'grid2');
+ IMODES.forEach(([v,n,sub])=>{const b=optCard(n,sub,Q.mode===v,true);b.onclick=()=>{g.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');const ch={mode:v};if(v==='outline')ch.depth=Math.min(Q.depth,2);else if(Q.depth<3)ch.depth=5;Object.assign(Q,ch);schedule();};g.appendChild(b);
+  queueThumb(b,'im'+v+(IIMG?IIMG.name:''),()=>{if(!IIMG)return null;const q=Object.assign({},Q,{mode:v,depth:v==='outline'?2:5});const res=Math.max(q.W,q.H)/400;const D=buildImage(q,res,Math.max(q.W,q.H)*0.05);if(v==='cutonly')D.cut.on=true;return renderWood(D,grooveField(D,90));});});}
+function stImgSize(main){head(main,'মাপ ও ঠিকঠাক','নকশাটা বোর্ডে কত বড় হবে লিখুন, তারপর দরকার হলে ছবিটা একটু ঠিক করে নিন।');
+ const g=grid(main,'grid2');let iw,ih;
+ iw=numField(g,'প্রস্থ',()=>Q.W,v=>{Q.W=v;if(Q.lock&&IIMG){Q.H=v*IIMG.h/IIMG.w;ih.value=uv(Q.H);}schedule();},true,'bigin');
+ ih=numField(g,'উচ্চতা',()=>Q.H,v=>{Q.H=v;if(Q.lock&&IIMG){Q.W=v*IIMG.w/IIMG.h;iw.value=uv(Q.W);}schedule();},true,'bigin');
+ togRow(main,'ছবির অনুপাত ঠিক রাখো',()=>Q.lock,v=>{Q.lock=v;});
+ const g2=grid(main,'grid2');numField(g2,'বোর্ডের পুরুত্ব',()=>Q.T,v=>{Q.T=v;schedule();},true);numField(g2,'খোদাইয়ের গভীরতা (মিমি)',()=>Q.depth,v=>{Q.depth=v;schedule();},false);
+ chipRow(main,[[6,'৬"'],[12,'১২"'],[18,'১৮"'],[24,'২৪"'],[36,'৩৬"']].map(([w,t])=>[w,UNIT==='in'?t+' চওড়া':fmtU(w*25.4)+' চওড়া','sug']),w=>Math.abs(Q.W-w*25.4)<1,w=>{Q.W=w*25.4;if(Q.lock&&IIMG)Q.H=Q.W*IIMG.h/IIMG.w;render();},'💡 প্রচলিত মাপ');
+ main.appendChild(H('<h3>ছবি ঠিক করা</h3>'));
+ rangeRow(main,'সাদা-কালো সীমা',5,95,1,()=>Q.thr,v=>{Q.thr=v;schedule();},false,x=>Math.round(x)+'%');
+ rangeRow(main,'মসৃণ করা',0,6,1,()=>Q.blur,v=>{Q.blur=v;schedule();},false);
+ rangeRow(main,'কনট্রাস্ট',0.3,3,0.1,()=>Q.gamma,v=>{Q.gamma=v;schedule();},false);
+ togRow(main,'উল্টো (সাদা অংশ খোদাই হবে)',()=>Q.inv,v=>{Q.inv=v;schedule();});
+ main.appendChild(H('<h3>কেটে আলাদা করা</h3>'));
+ togRow(main,'নকশার আকৃতি ধরে কেটে আলাদা করো',()=>Q.sil,v=>{Q.sil=v;schedule();});togRow(main,'চারকোণা প্যানেল হিসেবে কেটে আলাদা করো',()=>Q.panelCut,v=>{Q.panelCut=v;schedule();});
+ chipRow(main,[[0,'নেই'],[2,'২টা'],[4,'৪টা']],n=>(Q.tabs|0)===n,n=>{Q.tabs=n;schedule();},'ট্যাব');}
+
+/* ===================== MAKE (G-code) ===================== */
+function stMake(main){head(main,'মেশিনের ফাইল তৈরি','সব ঠিক থাকলে নিচের বড় বোতামে চাপ দিন। ফাইলগুলো ZIP হিসেবে নামবে।');
+ const sum=H(`<div class="box" id="mkSum"></div>`).firstChild;main.appendChild(sum);
+ chipRow(main,Object.entries(MATS).map(([k,v])=>[k,v[0]]),k=>CFG.mat===k,k=>{applyMat(k);renderMakeInfo();},'কাঠ / বোর্ড');
+ chipRow(main,[[0.3,'সূক্ষ্ম'],[0.5,'মাঝারি'],[1,'দ্রুত']],v=>+CFG.prec===v,v=>{CFG.prec=v;saveCfg();},'কাজের সূক্ষ্মতা');
+ main.appendChild(H('<div id="mkInfo"></div>'));
+ const btn=H('<button class="btn full" id="genB" style="margin-top:12px;font-size:18px;padding:15px">⚙️ মেশিনের ফাইল তৈরি করো</button>').firstChild;main.appendChild(btn);btn.onclick=generate;
+ main.appendChild(H('<div id="mkStatus" class="mini" style="margin-top:8px"></div><div id="mkOut"></div>'));renderMakeInfo();}
+function renderMakeInfo(){const s=$('mkSum');if(!s)return;s.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><b>${esc(CTRLS[CFG.ctrl].n)}</b><br><span class="mini">ফাইল: .${CFG.ext} · শূন্য বিন্দু: ${CFG.origin==='center'?'মাঝখান':'নিচের-বাম কোণা'}</span></div><button class="chip" id="mkCh">বদলান</button></div>`;$('mkCh').onclick=()=>nav('machine');
+ const inf=$('mkInfo');if(!inf||!LASTPV)return;const D=LASTPV.D,geo=LASTPV.geo;const ops=[];
+ if(D.grooves.length)ops.push('g');if(maxOf(D.relief)>0.05)ops.push('r');if(geo.jaliLoops.length)ops.push('j');if(D.drills.length)ops.push('d');if(D.cut.on&&geo.cut.length)ops.push('c');
+ let h='<h3>এই নকশায় যে বিটগুলো লাগবে</h3><div class="list">';ops.forEach((k,i)=>{const t=TOOLS[k];h+=`<div class="fileitem"><span class="n">${bn(i+1)}</span><div class="i"><b>${TOPS_INFO[k][0]}</b><small>${TOPS_INFO[k][1]} ${k==='g'?t.vang+'°':t.dia+' মিমি'} · ফিড ${t.feed}</small></div></div>`;});
+ h+='</div><p class="mini">বিট বদলাতে উপরের “বদলান” চাপুন।</p>';const W=warnings(D,geo);W.forEach(([c,t])=>h+=`<div class="${c==='warn'?'warn':c==='ok'?'okm':'tipm'}">${c==='warn'?'⚠️':'💡'} ${esc(t)}</div>`);inf.innerHTML=h;}
+let LASTGEN=null;
+async function generate(){const btn=$('genB');btn.disabled=true;const st=$('mkStatus');st.textContent='⏳ তৈরি হচ্ছে… বড় নকশায় কয়েক সেকেন্ড লাগতে পারে।';$('mkOut').innerHTML='';await new Promise(r=>setTimeout(r,50));
+ try{const cfg=readCfg();if(MODE==='image'&&!IIMG)throw new Error('আগে একটা ছবি দিন।');
+  const W=MODE==='image'?Q.W:P.W,Hh=MODE==='image'?Q.H:P.H;let res=cfg.prec;const mg=autoMargin();while(((W+2*mg)/res)*((Hh+2*mg)/res)>6e6)res*=1.15;
+  const D=buildCur(res);const geo=tpGeom(D,TOOLS);const ops=[];
+  if(D.grooves.length)ops.push(['1_border_vbit','g',opGroove(D,TOOLS.g,cfg)]);
+  if(maxOf(D.relief)>0.05)ops.push(['2_relief_ballnose','r',opRelief(D,TOOLS.r,cfg)]);
+  if(geo.jaliLoops.length)ops.push(['3_jali_flat','j',opJali(D,TOOLS.j,cfg,geo)]);
+  if(D.drills.length)ops.push(['4_drill','d',opDrill(D,TOOLS.d,cfg)]);
+  if(D.cut.on&&geo.cut.length)ops.push(['5_cutout_flat','c',opCut(D,TOOLS.c,cfg,geo)]);
+  if(!ops.length)throw new Error('কাটার মতো কিছু নেই। নকশা, বর্ডার বা কাটিং চালু করুন।');
+  const files=ops.map(([n,k,g])=>({name:n+'.'+cfg.ext,k,text:g.end(),time:g.time,lines:g.L.length}));
+  LASTGEN={D,geo,files,cfg,res,gF:grooveField(D,TOOLS.g.vang)};showGen();st.textContent='✅ ফাইল তৈরি হয়ে গেছে।';
+ }catch(e){console.error(e);st.textContent='❌ '+(e.message||'সমস্যা হয়েছে');}btn.disabled=false;}
+function tstr(min){const h=Math.floor(min/60),m=Math.round(min%60);return h?bn(h)+' ঘণ্টা '+bn(m)+' মিনিট':bn(Math.max(1,m))+' মিনিট';}
+function showGen(){const G=LASTGEN,o=$('mkOut');let tot=0;let h='<h3>আপনার ফাইলগুলো (এই ক্রমে মেশিনে দিন)</h3><div class="list">';
+ G.files.forEach((f,i)=>{tot+=f.time;const t=TOOLS[f.k];h+=`<div class="fileitem"><span class="n">${bn(i+1)}</span><div class="i"><b>${f.name}</b><small>${TOPS_INFO[f.k][1]} ${f.k==='g'?t.vang+'°':t.dia+' মিমি'} · প্রায় ${tstr(f.time)}</small></div><button class="chip" data-view="${i}">দেখুন</button></div>`;});
+ h+=`</div><p><b>মোট আনুমানিক সময়: ${tstr(tot)}</b></p><button class="btn full" id="zipB" style="font-size:17px">📦 সব ফাইল ডাউনলোড (ZIP)</button>
+ <p class="mini">ZIP-এর ভেতরে: মেশিনের ফাইল (.${G.cfg.ext}), 2D নকশা (DXF, SVG), 3D হাইটম্যাপ, মাপসহ ড্রয়িং আর নির্দেশনা।</p>
+ <div class="box"><b>মেশিনে চালানোর নিয়ম</b><ol style="margin:6px 0 0;padding-left:20px;font-size:14px"><li>ফোনের Files অ্যাপে ZIP-টা খুলুন (Extract)। ফাইলগুলো পেনড্রাইভে নিন।</li><li>বোর্ড ক্ল্যাম্প করুন। X/Y শূন্য করবেন বোর্ডের ${G.cfg.origin==='center'?'ঠিক মাঝখানে':'নিচের-বাম কোণায়'}।</li><li>১ নম্বর ফাইলের বিট লাগিয়ে Z শূন্য করুন বোর্ডের <b>উপরের তলে</b>।</li><li>ফাইলটা চালান। শেষ হলে পরের ফাইলের বিট লাগান, আবার Z শূন্য করে চালান।</li><li>প্রথমবার ncviewer.com-এ ফাইল খুলে সিমুলেশন দেখে নিন।</li></ol></div><pre class="code hidden" id="codeV"></pre>`;
+ o.innerHTML=h;o.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{const f=G.files[+b.dataset.view],pre=$('codeV');pre.classList.remove('hidden');pre.textContent=f.text.split('\n').slice(0,250).join('\n')+(f.lines>250?'\n… (প্রথম ২৫০ লাইন)':'');pre.scrollIntoView({behavior:'smooth',block:'nearest'});});
+ $('zipB').onclick=makeZipAndSave;setTimeout(()=>$('zipB').scrollIntoView({behavior:'smooth',block:'center'}),80);}
+function readme(){const G=LASTGEN,D=G.D;let s='Noksha CNC (নকশা CNC)\r\n=====================\r\n';
+ s+=`মাপ: ${fmt(D.W)} x ${fmt(D.H)} মিমি, পুরুত্ব ${fmt(D.T)} মিমি\r\nকন্ট্রোলার: ${CTRLS[CFG.ctrl].n}\r\nশূন্য বিন্দু: X0 Y0 = ${G.cfg.origin==='center'?'বোর্ডের মাঝখান':'নিচের-বাম কোণা'}, Z0 = বোর্ডের উপরের তল\r\nএকক: মিলিমিটার (G21), Absolute (G90)\r\n\r\nক্রম অনুযায়ী ফাইল (প্রতিটার আগে বিট বদলে Z আবার শূন্য করুন):\r\n`;
+ G.files.forEach((f,i)=>{const t=TOOLS[f.k];s+=`  ${i+1}. ${f.name} — ${TOPS_INFO[f.k][0]} — ${TOPS_INFO[f.k][1]} ${f.k==='g'?t.vang+'°':t.dia+' মিমি'}, ফিড ${t.feed}, RPM ${t.rpm}, প্রায় ${Math.round(f.time)} মিনিট\r\n`;});
+ s+=`\r\nঅন্যান্য ফাইল:\r\n  design.dxf / design.svg — 2D নকশা (ArtCAM/Aspire/VCarve/AutoCAD)\r\n  heightmap.png — 3D রিলিফ ম্যাপ (সাদা = উপরের তল, কালো = সবচেয়ে গভীর)\r\n  preview.png — 3D ছবি, drawing.png — মাপসহ 2D ড্রয়িং\r\n\r\nপ্রথমে ncviewer.com-এ সিমুলেশন দেখুন। বোর্ড ক্ল্যাম্প করুন, নিচে স্পয়েল বোর্ড রাখুন।\r\n`;return s;}
+function drawingCanvas(){const G=LASTGEN,D=G.D;const tw=D.W+2*D.M,th=D.H+2*D.M,sc=Math.min(2400/tw,2400/th);const c=document.createElement('canvas');c.width=Math.round(tw*sc);c.height=Math.round(th*sc);
+ drawDrawing(c.getContext('2d'),D,G.geo,sc,x=>(x+D.M)*sc,y=>(D.H+D.M-y)*sc,2);return c;}
+async function makeZipAndSave(){const b=$('zipB');b.disabled=true;const old=b.textContent;b.textContent='⏳ ZIP তৈরি হচ্ছে…';
+ try{const G=LASTGEN,enc=new TextEncoder();const files=G.files.map(f=>({name:f.name,data:enc.encode(f.text)}));
+  files.push({name:'design.dxf',data:enc.encode(makeDXF())},{name:'design.svg',data:enc.encode(makeSVG())});
+  for(const [n,c] of [['heightmap.png',heightmapCanvas()],['preview.png',renderWood(G.D,G.gF)],['drawing.png',drawingCanvas()]])files.push({name:n,data:new Uint8Array(await (await canvasBlob(c)).arrayBuffer())});
+  files.push({name:'README.txt',data:enc.encode('﻿'+readme())});
+  const zip=await makeZip(files);const nm=(MODE==='design'?P.part:'image')+'_noksha_cnc.zip';await saveFile(nm,zip);}
+ catch(e){console.error(e);toast('ZIP তৈরি করা যায়নি');}b.disabled=false;b.textContent=old;}
+let DL=null;(async()=>{try{if(window.claude&&typeof window.claude.use==='function')DL=await window.claude.use('downloads');}catch(e){DL=null;}})();
+
+/* ===================== MACHINE SCREEN ===================== */
+function scMachine(main){head(main,'মেশিন ও বিট সেটিং','একবার ঠিক করে দিলে অ্যাপ মনে রাখবে।');
+ main.appendChild(H('<h3>আপনার মেশিনের কন্ট্রোলার</h3>'));const g=grid(main,'grid2');
+ Object.entries(CTRLS).forEach(([k,v])=>{const b=document.createElement('button');b.className='fur'+(CFG.ctrl===k?' on':'');b.style.textAlign='left';b.innerHTML=`${esc(v.n)}<br><span class="mini">${esc(v.d)} · .${v.ext}</span>`;b.onclick=()=>{setCtrl(k);g.querySelectorAll('.fur').forEach(x=>x.classList.remove('on'));b.classList.add('on');toast(v.n+' সেট হয়েছে');};g.appendChild(b);});
+ chipRow(main,Object.entries(MATS).map(([k,v])=>[k,v[0]]),k=>CFG.mat===k,k=>{applyMat(k);render();},'কাঠ / বোর্ড (ফিড আপনাআপনি বসবে)');
+ chipRow(main,[['bl','নিচের-বাম কোণা'],['center','মাঝখান']],v=>CFG.origin===v,v=>{CFG.origin=v;saveCfg();},'শূন্য বিন্দু (X0 Y0)');
+ main.appendChild(H('<h3>আপনার বিটগুলো</h3>'));
+ for(const k of ['g','r','j','d','c']){const t=TOOLS[k];const box=H(`<div class="box"><b>${TOPS_INFO[k][0]}</b> <span class="mini">— ${TOPS_INFO[k][1]}</span></div>`).firstChild;main.appendChild(box);
+  if(k==='g')chipRow(box,BITCH.g,v=>t.vang===v,v=>{t.vang=v;saveCfg();});else chipRow(box,BITCH[k].map(v=>[v,v+' মিমি']),v=>Math.abs(t.dia-v)<0.01,v=>{t.dia=v;if(k==='r')t.step=Math.round(v*0.15*100)/100;if(k==='j')t.step=Math.round(v*0.4*10)/10;saveCfg();});
+  const d=more(box,'আরও (ফিড, RPM, গভীরতা)');const gg=grid(d,'grid2');if(k!=='g')numField(gg,'ব্যাস (মিমি)',()=>t.dia,v=>{t.dia=v;saveCfg();},false);
+  Object.keys(TFIELDS).forEach(f=>{if(t[f]!==undefined)numField(gg,TFIELDS[f],()=>t[f],v=>{t[f]=v;saveCfg();},false);});}
+ const adv=more(main,'🛠️ উন্নত সেটিং');const ga=grid(adv,'grid2');
+ const sel=H(`<label class="fld"><span>ফাইলের ধরন</span><select>${['nc','tap','gcode','txt'].map(e=>`<option ${CFG.ext===e?'selected':''}>${e}</option>`).join('')}</select></label>`).firstChild;sel.querySelector('select').onchange=e=>{CFG.ext=e.target.value;saveCfg();};ga.appendChild(sel);
+ numField(ga,'নিরাপদ উচ্চতা Safe Z (মিমি)',()=>CFG.safe,v=>{CFG.safe=v;saveCfg();},false);numField(ga,'ছোট সরণের উচ্চতা (মিমি)',()=>CFG.ret,v=>{CFG.ret=v;saveCfg();},false);numField(ga,'এপার-ওপারে বাড়তি গভীরতা (মিমি)',()=>CFG.over,v=>{CFG.over=v;saveCfg();},false);
+ togRow(adv,'কমেন্ট লাইন রাখো',()=>CFG.cm,v=>{CFG.cm=v;saveCfg();});togRow(adv,'স্পিন্ডল চালু/বন্ধ কমান্ড (M3/M5)',()=>CFG.m3!==false,v=>{CFG.m3=v;saveCfg();});
+ const rs=H('<button class="btn sec" style="margin-top:10px">↺ বিট সেটিং আগের মতো করো</button>').firstChild;rs.onclick=()=>{TOOLS=JSON.parse(JSON.stringify(TBASE));applyMat(CFG.mat);render();toast('আগের মতো করা হয়েছে');};main.appendChild(rs);}
+
+/* ===================== CUT LIST ===================== */
+let CLT='alm';const CLV={a_W:1219.2,a_H:2133.6,a_D:558.8,a_T:18,a_BT:6,a_base:76.2,a_nD:2,a_nDr:2,a_drH:177.8,a_nP:1,a_nS:3,a_gap:3,a_sl:12.5,a_cr:254,b_W:1524,b_L:2032,b_hH:1100,b_fH:500,b_rH:200,b_T:25,b_nS:12,b_sW:75,b_cl:20};
+const CLF={alm:[['a_W','মোট প্রস্থ',1],['a_H','মোট উচ্চতা',1],['a_D','গভীরতা',1],['a_T','বোর্ডের পুরুত্ব',1],['a_BT','পিছনের বোর্ড',1],['a_base','নিচের পট্টি উচ্চতা',1],['a_nD','পাল্লার সংখ্যা',0],['a_nDr','ড্রয়ারের সংখ্যা',0],['a_drH','প্রতি ড্রয়ারের উচ্চতা',1],['a_nP','মাঝের খাড়া পার্টিশন',0],['a_nS','প্রতি খোপে তাক',0],['a_gap','পাল্লার ফাঁক',1],['a_sl','চ্যানেলের ফাঁক (প্রতি পাশে)',1],['a_cr','চালের উচ্চতা (০ = নেই)',1]],
+ bed:[['b_W','তোশকের প্রস্থ',1],['b_L','তোশকের দৈর্ঘ্য',1],['b_hH','মাথার দিকের উচ্চতা',1],['b_fH','পায়ের দিকের উচ্চতা',1],['b_rH','পাশের রেলের উচ্চতা',1],['b_T','বোর্ডের পুরুত্ব',1],['b_nS','পাটাতনের সংখ্যা',0],['b_sW','পাটাতনের চওড়া',1],['b_cl','চারপাশে ফাঁক',1]]};
+function scCut(main){head(main,'মাপ হিসাব (কাটিং লিস্ট)','পুরো ফার্নিচারের বাইরের মাপ দিন। প্রতিটা অংশ কত মাপে কাটতে হবে আর কয়টা বোর্ড লাগবে, নিচে দেখাবে।');
+ chipRow(main,[['alm','🗄️ আলমারি / ওয়ার্ডরোব'],['bed','🛏️ খাট']],v=>CLT===v,v=>{CLT=v;render();});
+ const g=grid(main,'grid2');g.style.marginTop='10px';CLF[CLT].forEach(([id,l,dim])=>numField(g,l,()=>CLV[id],v=>{CLV[id]=dim?v:Math.round(v);calcCL();},!!dim));
+ if(CLT==='bed')chipRow(main,[['1067x1905','সিঙ্গেল ৩.৫×৬.২৫ ফুট'],['1372x1905','ডাবল ৪.৫×৬.২৫ ফুট'],['1524x2032','কুইন ৫×৬.৬৭ ফুট'],['1829x2032','কিং ৬×৬.৬৭ ফুট']].map(x=>[x[0],x[1],'sug']),()=>false,v=>{const [w,l]=v.split('x').map(Number);CLV.b_W=w;CLV.b_L=l;render();},'💡 তোশকের প্রচলিত মাপ');
+ main.appendChild(H('<div id="clOut" style="margin-top:12px"></div>'));calcCL();}
+function calcCL(){const o=$('clOut');if(!o)return;const v=k=>CLV[k],rows=[],R=(n,q,l,w,t,note,des)=>{if(q>0&&l>0&&w>0)rows.push({n,q,l,w,t,note:note||'',des});};
+ if(CLT==='alm'){const W=v('a_W'),Hh=v('a_H'),D=v('a_D'),T=v('a_T'),BT=v('a_BT'),base=v('a_base'),nD=v('a_nD'),nDr=v('a_nDr'),drH=v('a_drH'),nP=v('a_nP'),nS=v('a_nS'),gap=v('a_gap'),sl=v('a_sl'),cr=v('a_cr');
+  const iW=W-2*T,iH=Hh-base-2*T,zone=nDr*drH,sec=nP+1,secW=(iW-nP*T)/sec;
+  R('সাইড প্যানেল',2,Hh,D,T,'দুই পাশ','side');R('ছাদ (টপ)',1,iW,D,T,'দুই সাইডের মাঝে');R('তলা (বটম)',1,iW,D,T,'বেসের উপরে');
+  if(base>0)R('নিচের পট্টি (বেস)',1,iW,base,T,'সামনে','plinth');R('পিছনের বোর্ড',1,Hh-base,W,BT,'পেরেক/স্ক্রু দিয়ে লাগবে');
+  if(nDr>0)R('ড্রয়ারের উপরের তাক',1,iW,D-BT,T,'ড্রয়ার আর পাল্লার মাঝে');const pH=iH-(nDr>0?zone+T:0);if(nP>0)R('মাঝের পার্টিশন',nP,pH,D-BT,T,'খাড়া');
+  if(nS>0)R('তাক (শেলফ)',nS*sec,secW-1,D-BT-20,T,'প্রতি খোপে '+nS+'টা, সামনে ২০ মিমি পিছিয়ে');
+  if(nD>0){const dH=Hh-base-(nDr>0?zone+T/2:0)-gap,dW=(W-gap*(nD+1))/nD;R('পাল্লা',nD,dH,dW,T,'ফুল ওভারলে','door');}
+  if(nDr>0){R('ড্রয়ারের সামনে',nDr,W-2*gap,drH-gap,T,'ফুল ওভারলে','drawer');const bw=iW-2*sl,bh=Math.max(60,drH-45),sls=[250,300,350,400,450,500,550,600];const bd=sls.filter(s=>s<=D-BT-20).pop()||D-BT-30;
+   R('ড্রয়ার বাক্সের পাশ',2*nDr,bd,bh,12,'চ্যানেল '+bd+' মিমি লম্বা নিন');R('ড্রয়ার বাক্সের সামনে-পিছনে',2*nDr,bw-24,bh,12);R('ড্রয়ারের তলা',nDr,bw,bd,BT);}
+  if(cr>0)R('চাল (মাথার নকশা)',1,W+40,cr,T,'দুই পাশে ২০ মিমি বাড়তি','crown');}
+ else{const mW=v('b_W'),mL=v('b_L'),hH=v('b_hH'),fH=v('b_fH'),rH=v('b_rH'),T=v('b_T'),nS=v('b_nS'),sW=v('b_sW'),cl=v('b_cl'),iw=mW+2*cl,il=mL+2*cl;
+  R('খাটের মাথা',1,iw+2*T,hH,T,'নকশার মূল অংশ','headboard');R('পায়ের দিক',1,iw+2*T,fH,T,'','footboard');R('পাশের রেল',2,il,rH,T);R('পাটাতনের সাপোর্ট পট্টি',2,il,40,40,'রেলের ভেতরে');R('পাটাতন',nS,iw,sW,18);R('মাঝের সাপোর্ট বিম',1,il,100,T,'লম্বালম্বি মাঝে');}
+ const cv=x=>uv(x);let h=`<div class="scroll"><table class="t"><tr><th>অংশ</th><th>সংখ্যা</th><th>লম্বা × চওড়া<br>(${UNAME[UNIT]})</th><th>পুরু</th></tr>`;const area={};
+ rows.forEach((r,i)=>{area[r.t]=(area[r.t]||0)+r.q*r.l*r.w;h+=`<tr><td><b>${r.n}</b>${r.note?'<br><span class="mini">'+r.note+'</span>':''}${r.des?`<br><button class="chip" data-des="${i}" style="margin-top:4px">✏️ এই মাপে ডিজাইন</button>`:''}</td><td>${bn(r.q)}</td><td>${cv(r.l)} × ${cv(r.w)}</td><td>${cv(r.t)}</td></tr>`;});
+ h+='</table></div><h3>বোর্ড লাগবে (৮×৪ ফুট শিট, ১৫% অপচয় ধরে)</h3><ul>';Object.keys(area).sort((a,b)=>b-a).forEach(t=>{h+=`<li>${fmtU(+t)} পুরু: ${(area[t]/92903).toFixed(1)} বর্গফুট → প্রায় <b>${bn(Math.ceil(area[t]/(2440*1220)*1.15))}টা শিট</b></li>`;});
+ h+='</ul><div class="row2"><button class="slim" id="clCopy">📋 তালিকা কপি</button><button class="slim" id="clCsv">⬇️ CSV (Excel)</button></div>';o.innerHTML=h;
+ o.querySelectorAll('[data-des]').forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.des],fk=CLT==='alm'?'almirah':'bed',pk=r.des,tall=['door','side'].includes(pk),W=tall?r.w:r.l,Hh=tall?r.l:r.w;
+  DIMS[pk]={W,H:Hh,T:r.t};store.set('dims',DIMS);setPartFresh(FURN[fk].parts.includes(pk)?fk:'custom',pk);nav('custom',3);toast(r.n+': '+fmtSz(W,Hh)+' মাপে খোলা হয়েছে');});
+ const txt=rows.map(r=>`${r.n}\t${r.q}\t${cv(r.l)} x ${cv(r.w)}\t${cv(r.t)} ${UNAME[UNIT]}`).join('\n');
+ $('clCopy').onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast('কপি হয়েছে ✅');}catch(e){toast('কপি করা যায়নি');}};
+ $('clCsv').onclick=()=>{const csv='﻿অংশ,সংখ্যা,লম্বা,চওড়া,পুরুত্ব,একক,নোট\n'+rows.map(r=>[r.n,r.q,cv(r.l),cv(r.w),cv(r.t),UNAME[UNIT],r.note].map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');saveFile('cut_list.csv',new Blob([csv],{type:'text/csv'}));};}
+
+/* ===================== HELP ===================== */
+const GUIDE=[
+ {t:'🌸 পাল্লায় ফুলের খোদাই',r:'<b>রেডি নকশা → আলমারি</b> থেকে “ফুলেল পাল্লা” বাছুন, নিজের মাপ দিন, ফাইল নিন। বিট: বর্ডারে ৯০° V-বিট, নকশায় ৩ মিমি বল-নোজ, কাটিংয়ে ৬ মিমি ফ্ল্যাট।',go:()=>{RS.furn='almirah';nav('ready',2);}},
+ {t:'✏️ নিজের পছন্দে নকশা',r:'<b>নিজে ডিজাইন</b>-এ প্রতিটা ধাপে ছবি দেখে বাছবেন: আকৃতি → বর্ডার → মাঝের নকশা → স্টাইল → কোণা → জালি → ছিদ্র → ফাইল।',go:()=>{if(!P.part)setPartFresh('almirah','door');nav('custom',1);}},
+ {t:'🔤 নাম / লেখা / লোগো',r:'<b>ছবি থেকে</b> অংশে সাদা ব্যাকগ্রাউন্ডে কালো লেখার PNG দিন (Canva বা Word-এ লিখে স্ক্রিনশট নিলেও চলে)। “কালো অংশ খোদাই” (৩ মিমি ফ্ল্যাট) বা “শুধু লাইন” (V-বিট) বাছুন।',go:()=>{Q.mode='pocket';nav('image',1);}},
+ {t:'🕸️ জালি',r:'রেডি নকশায় “জালি পাল্লা” বা “জালি পার্টিশন” আছে। নিজে বানাতে চাইলে “নিজে ডিজাইন”-এর জালি ধাপে যান। ছোট জালির জন্য ৩.১৭৫ মিমি ফ্ল্যাট বিট নিন।',go:()=>{RS.furn='partition';nav('ready',2);}},
+ {t:'🏔️ ছবি থেকে 3D রিলিফ',r:'<b>ছবি থেকে → 3D রিলিফ</b>। গ্রেস্কেল ডেপথ ম্যাপ দিন (সাদা = উঁচু, কালো = নিচু), PNG, ১৫০০+ পিক্সেল। বিট ১.৫–৩ মিমি বল-নোজ।',go:()=>{Q.mode='relief';nav('image',1);}},
+ {t:'🛏️ খাটের মাথা',r:'রেডি নকশা → খাট। আগে “মাপ হিসাব → খাট” থেকে মাথার মাপ জেনে নিন, সেখান থেকে এক চাপে ডিজাইনে খোলা যায়।',go:()=>{RS.furn='bed';nav('ready',2);}},
+ {t:'📐 পুরো আলমারির মাপ',r:'<b>মাপ হিসাব</b>-এ বাইরের মাপ দিন। প্রতিটা অংশের কাটিং লিস্ট আর কয়টা বোর্ড লাগবে, সব পাবেন।',go:()=>nav('cut')},
+ {t:'⚙️ প্রথমবার মেশিন সেট',r:'<b>মেশিন ও বিট</b>-এ আপনার কন্ট্রোলার (Richauto/NcStudio/Mach3) আর যে বিটগুলো আছে সেগুলো একবার বাছুন। অ্যাপ মনে রাখবে।',go:()=>nav('machine')}];
+function scHelp(main){head(main,'কী বানাতে চান?','বাছাই করুন, কোথায় যেতে হবে আর কী লাগবে বলে দেবে।');const g=document.createElement('div');g.className='guide';main.appendChild(g);const out=document.createElement('div');main.appendChild(out);
+ GUIDE.forEach(it=>{const b=document.createElement('button');b.textContent=it.t;b.onclick=()=>{g.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');out.innerHTML=`<div class="tip">${it.r}</div>`;const go=H('<button class="btn full">এখানে শুরু করো →</button>').firstChild;go.onclick=it.go;out.appendChild(go);};g.appendChild(b);});
+ main.appendChild(H(`<div class="help" style="margin-top:14px">
+ <details><summary>🧩 কোন নকশায় কোন বিট</summary><div class="in scroll"><table class="t"><tr><th>কাজ</th><th>বিট</th></tr>
+ <tr><td>বর্ডার লাইন, 2D রেখা, লেখা</td><td>৯০° বা ৬০° V-বিট</td></tr><tr><td>ফুল, পদ্ম, মান্ডালা (3D রিলিফ/খোদাই)</td><td>৩ মিমি বা ১.৫ মিমি বল-নোজ</td></tr><tr><td>রেইজড প্যানেল</td><td>৬ মিমি বল-নোজ</td></tr><tr><td>জালি</td><td>৩.১৭৫ বা ৬ মিমি ফ্ল্যাট</td></tr><tr><td>কেটে আলাদা করা</td><td>৬ মিমি ফ্ল্যাট (প্লাইউডে কম্প্রেশন বিট)</td></tr></table></div></details>
+ <details><summary>📁 ভালো নকশার জন্য কেমন ছবি দেবেন</summary><div class="in"><ul><li>সবচেয়ে ভালো: <b>PNG, সাদা ব্যাকগ্রাউন্ডে কালো নকশা</b>, ১৫০০+ পিক্সেল।</li><li>3D রিলিফের জন্য <b>গ্রেস্কেল ডেপথ ম্যাপ</b> (সাদা = উঁচু, কালো = নিচু)। “CNC relief depth map” লিখে খুঁজলে পাওয়া যায়।</li><li>JPG চলে, তবে কিনারা ঝাপসা হয়। তখন “মসৃণ করা” ১–২ দিন।</li><li>রঙিন ফটো (মানুষ, প্রকৃতি) থেকে ভালো খোদাই হয় না।</li><li>অ্যাপটা উল্টো দিকে DXF আর SVG তৈরি করে দেয়, যা ArtCAM/Aspire-এ খোলা যায়।</li></ul></div></details>
+ <details><summary>🌳 কাঠ অনুযায়ী স্পিড</summary><div class="in scroll"><table class="t"><tr><th>কাঠ</th><th>৬ মিমি ফ্ল্যাট ফিড</th><th>প্রতি পাস</th></tr><tr><td>MDF</td><td>১৮০০–২৫০০</td><td>৪–৬ মিমি</td></tr><tr><td>নরম কাঠ</td><td>১৮০০–২২০০</td><td>৪ মিমি</td></tr><tr><td>মেহগনি</td><td>১৫০০–১৮০০</td><td>৩–৪ মিমি</td></tr><tr><td>সেগুন</td><td>১২০০–১৬০০</td><td>৩ মিমি</td></tr><tr><td>শাল/গর্জন</td><td>৯০০–১২০০</td><td>২–৩ মিমি</td></tr></table><p class="mini">মেশিন সেটিংয়ে কাঠ বাছাই করলে এগুলো আপনাআপনি বসে যায়।</p></div></details>
+ <details><summary>⚙️ মেশিনে চালানোর নিয়ম</summary><div class="in"><ol><li>ZIP খুলে .nc/.tap ফাইল পেনড্রাইভে নিন।</li><li>X/Y শূন্য = বোর্ডের নিচের-বাম কোণা (বা মাঝখান, যেটা সেট করেছেন)।</li><li>Z শূন্য = বোর্ডের উপরের তল। প্রতিবার বিট বদলানোর পর আবার Z শূন্য করুন।</li><li>ক্রম: ১ বর্ডার → ২ রিলিফ → ৩ জালি → ৪ ছিদ্র → ৫ কাটিং (সবসময় শেষে)।</li><li>নিচে স্পয়েল বোর্ড রাখুন, কারণ এপার-ওপার কাটায় বিট ০.৫ মিমি বেশি নামে।</li><li>প্রথমবার ncviewer.com বা CAMotics-এ সিমুলেশন দেখুন, তারপর MDF-এ পরীক্ষা করুন।</li></ol></div></details>
+ <details><summary>❓ মেশিন কি এই ফাইল বুঝবে?</summary><div class="in"><p>হ্যাঁ। ফাইলগুলো স্ট্যান্ডার্ড G-code-এ (G0, G1, G21 মিলিমিটার, G90, M3/M5, M30) তৈরি, যা Richauto DSP, NcStudio, Mach3, GRBL সব কন্ট্রোলারই পড়তে পারে। কন্ট্রোলার .nc না চিনলে মেশিন সেটিং থেকে .tap বাছুন। কমেন্ট লাইনে সমস্যা হলে “কমেন্ট লাইন” বন্ধ রাখুন (Richauto-তে ডিফল্টে বন্ধ)।</p></div></details>
+ <details><summary>ℹ️ সীমাবদ্ধতা</summary><div class="in"><ul><li>খুব জটিল মূর্তি বা STL 3D মডেলের জন্য ArtCAM/Aspire ভালো। এখানকার heightmap.png আর DXF সেখানে ব্যবহার করা যায়।</li><li>বল-নোজ দিয়ে খাড়া দেয়াল পুরো সোজা হয় না। খুব ধারালো কাজে ছোট বিট নিন।</li></ul></div></details></div>`));}
+
+/* ===================== INIT ===================== */
+function init(){
+ $('backB').onclick=goBack;$('prevB').onclick=()=>nav(ROUTE.s,ROUTE.st-1);
+ $('nextB').onclick=()=>{if(canNext())nav(ROUTE.s,ROUTE.st+1);};
+ $('unitB').onclick=()=>{UNIT={in:'mm',mm:'cm',cm:'in'}[UNIT];store.set('unit',UNIT);toast('একক: '+UNAME[UNIT]);render();};
+ $('pvSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;markSeg('pvSeg',VIEW);if(LASTPV){const bx=$('pvBox');drawInto($('pv'),LASTPV,bx.clientWidth-4,bx.clientHeight-4,VIEW);}});
+ $('pvFull').onclick=openViewer;$('pvBox').addEventListener('dblclick',openViewer);
+ $('vClose').onclick=()=>{$('viewer').classList.add('hidden');VPV=null;};
+ $('vSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{VV=b.dataset.v;markSeg('vSeg',VV);drawViewer();});
+ $('vZoom').onclick=()=>$('vcv').classList.toggle('zoom');
+ window.addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{if(PVON&&LASTPV){const bx=$('pvBox');drawInto($('pv'),LASTPV,bx.clientWidth-4,bx.clientHeight-4,VIEW);}},150);});
+ if(!store.get('cfg',null))applyMat(CFG.mat);
+ const last=store.get('last',null);if(last&&last.part&&PARTS[last.part]){P=Object.assign({},DEF,last);BASE=Object.assign({},P);}
+ parseHash();render();
+ try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}
+init();
+
+</script>
+</body>
+</html>
